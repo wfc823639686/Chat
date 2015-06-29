@@ -1,0 +1,23 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Message">
+        <item name="android:textColor">#000</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="Message.Head">
+        <item name="android:layout_width">@dimen/message_head_size</item>
+        <item name="android:layout_height">@dimen/message_head_size</item>
+        <item name="android:background">#eee</item>
+    </style>
+
+    <style name="Message.Text">
+
+    </style>
+
+</resources>
