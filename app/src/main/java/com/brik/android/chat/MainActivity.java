@@ -27,6 +27,11 @@ public class MainActivity extends RoboFragmentActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = IChatService.Stub.asInterface(service);
+            try {
+                mService.connect();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
             chat();
         }
 

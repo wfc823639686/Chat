@@ -34,8 +34,19 @@ public class ChatService extends Service {
 
         @Override
         public void connect() throws RemoteException {
-
+            ChatService.this.connect();
         }
+
+        @Override
+        public void login(String username, String password) throws RemoteException {
+            ChatService.this.login(username, password);
+        }
+
+        @Override
+        public void register() throws RemoteException {
+            ChatService.this.register();
+        }
+
     };
 
     @Override
@@ -60,10 +71,40 @@ public class ChatService extends Service {
             public void run() {
                 try {
                     client.connect();
-                    ChatEventObservable.getInstance().connectChanged(ConnectListener.class, true);
+                    ChatEventObservable.getInstance().successChanged(ConnectListener.class);
                 } catch (XMPPException e) {
                     e.printStackTrace();
-                    ChatEventObservable.getInstance().connectChanged(ConnectListener.class, false);
+                    ChatEventObservable.getInstance().failChanged(ConnectListener.class, e);
+                }
+            }
+        });
+    }
+
+    public void login(final String username, final String password) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    client.login(username, password);
+                    ChatEventObservable.getInstance().successChanged(LoginListener.class);
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                    ChatEventObservable.getInstance().failChanged(LoginListener.class, e);
+                }
+            }
+        });
+    }
+
+    public void register() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    client.register();
+                    ChatEventObservable.getInstance().successChanged(RegisterListener.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ChatEventObservable.getInstance().failChanged(RegisterListener.class, e);
                 }
             }
         });

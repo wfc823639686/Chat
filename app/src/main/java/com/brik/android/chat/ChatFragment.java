@@ -5,6 +5,7 @@ import android.content.Context;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,7 +17,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.brik.android.chat.service.ConnectEvent;
+import com.brik.android.chat.service.ConnectListener;
+import com.brik.android.chat.service.LoginEvent;
+import com.brik.android.chat.service.LoginListener;
 import com.google.inject.Inject;
 
 import org.jivesoftware.smack.Chat;
@@ -37,7 +43,7 @@ import roboguice.inject.InjectView;
  */
 public class ChatFragment extends RoboFragment {
 
-    String userId = "123456";
+    String userId = "admin";
 
     Chat chat;
 
@@ -57,6 +63,50 @@ public class ChatFragment extends RoboFragment {
     private Context mContext;
 
     private IChatService mService;
+
+    private ConnectListener connectListener = new ConnectListener() {
+        @Override
+        public void onSuccess(ConnectEvent data) {
+            System.out.println("连接成功");
+            try {
+                mService.login("123456", "123456");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFail(Throwable throwable) {
+            System.out.println("连接失败，" + throwable.getMessage());
+        }
+    };
+
+    private LoginListener loginListener = new LoginListener() {
+        @Override
+        public void onSuccess(LoginEvent data) {
+            System.out.println("login成功");
+            createChat();
+        }
+
+        @Override
+        public void onFail(Throwable throwable) {
+            System.out.println("login失败，" + throwable.getMessage());
+        }
+    };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ChatEventObservable.getInstance().register(connectListener);
+        ChatEventObservable.getInstance().register(loginListener);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        ChatEventObservable.getInstance().unregister(connectListener);
+        ChatEventObservable.getInstance().unregister(loginListener);
+    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -81,7 +131,7 @@ public class ChatFragment extends RoboFragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
 
-        createChat();
+
 
         sendView.setOnClickListener(new View.OnClickListener() {
             @Override

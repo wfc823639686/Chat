@@ -12,4 +12,8 @@ interface IChatService {
             double aDouble, String aString);
 
     void connect();
+
+    void login(String username, String password);
+
+    void register();
 }
