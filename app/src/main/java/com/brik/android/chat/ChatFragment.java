@@ -68,6 +68,7 @@ public class ChatFragment extends RoboFragment {
         @Override
         public void onSuccess(ConnectEvent data) {
             System.out.println("连接成功");
+            System.out.println(data.name);
             try {
                 mService.login("123456", "123456");
             } catch (RemoteException e) {

@@ -24,5 +24,6 @@ dependencies {
     compile 'com.android.support:support-v4:+'
     compile 'com.android.support:recyclerview-v7:+'
     compile group: 'org.roboguice', name: 'roboguice', version: '2.0'
+    compile group: 'com.j256.ormlite', name: 'ormlite-android', version: '4.48'
     compile files('libs/asmack-jse-buddycloud-2010.12.11.jar')
 }

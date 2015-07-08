@@ -7,4 +7,6 @@ import com.brik.android.chat.BaseEvent;
  */
 public class ConnectEvent extends BaseEvent {
 
+    public String name;
+
 }

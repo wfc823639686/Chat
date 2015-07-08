@@ -51,6 +51,10 @@ public class ChatEventObservable extends Observable {
         dataChanged(c, true, null, null);
     }
 
+    public void successChanged(Class c, BaseEvent event) {
+        dataChanged(c, true, event, null);
+    }
+
     public void failChanged(Class c, Throwable throwable) {
         dataChanged(c, false, null, throwable);
     }

@@ -11,9 +11,15 @@ import com.brik.android.chat.ChatEventObservable;
 import com.brik.android.chat.Constants;
 import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
+import com.brik.android.chat.db.entry.MessageConver;
+import com.brik.android.chat.db.entry.MessageDAO;
 
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -23,6 +29,8 @@ import java.util.concurrent.Executors;
  * Created by wangfengchen on 15/6/26.
  */
 public class ChatService extends Service {
+
+    MessageDAO messageDAO;
 
     XMPPClient client = XMPPClient.getInstance();
 
@@ -59,7 +67,7 @@ public class ChatService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        messageDAO = new MessageDAO(this);
     }
 
     /**
@@ -71,7 +79,10 @@ public class ChatService extends Service {
             public void run() {
                 try {
                     client.connect();
-                    ChatEventObservable.getInstance().successChanged(ConnectListener.class);
+                    ConnectEvent event = new ConnectEvent();
+                    event.name = "haha";
+                    ChatEventObservable.getInstance().successChanged(ConnectListener.class, event);
+                    rec();
                 } catch (XMPPException e) {
                     e.printStackTrace();
                     ChatEventObservable.getInstance().failChanged(ConnectListener.class, e);
@@ -115,6 +126,26 @@ public class ChatService extends Service {
             @Override
             public void run() {
                 Collection<RosterEntry> entries = client.getRoster().getEntries();
+            }
+        });
+    }
+
+    public void rec() {
+        System.out.println("开始接收");
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                client.getChatManager().addChatListener(new ChatManagerListener() {
+
+                    @Override
+                    public void chatCreated(Chat chat, boolean b) {
+                        chat.addMessageListener(new MessageListener() {
+                            public void processMessage(Chat newchat, Message message) {
+                                messageDAO.add(MessageConver.toOrmMessage(message));
+                            }
+                        });
+                    }
+                });
             }
         });
     }
