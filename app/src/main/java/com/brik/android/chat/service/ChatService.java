@@ -2,8 +2,14 @@ package com.brik.android.chat.service;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Messenger;
+import android.os.RemoteException;
 
+import com.brik.android.chat.ChatEventObservable;
+import com.brik.android.chat.Constants;
+import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 
 import org.jivesoftware.smack.RosterEntry;
@@ -20,9 +26,21 @@ public class ChatService extends Service {
 
     XMPPClient client = XMPPClient.getInstance();
 
+    private IChatService.Stub mService = new IChatService.Stub() {
+        @Override
+        public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
+
+        }
+
+        @Override
+        public void connect() throws RemoteException {
+
+        }
+    };
+
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mService;
     }
 
     ExecutorService executor = Executors.newCachedThreadPool();
@@ -35,29 +53,27 @@ public class ChatService extends Service {
 
     /**
      * 连接
-     * @param listener
      */
-    public void connect(final ConnectListener listener) {
+    public void connect() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     client.connect();
-                    listener.onSuccess();
+                    ChatEventObservable.getInstance().connectChanged(ConnectListener.class, true);
                 } catch (XMPPException e) {
                     e.printStackTrace();
-                    listener.onError(e);
+                    ChatEventObservable.getInstance().connectChanged(ConnectListener.class, false);
                 }
             }
         });
     }
 
-    public void getRoster(final RosterListener listener) {
+    public void getRoster() {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 Collection<RosterEntry> entries = client.getRoster().getEntries();
-                listener.onSuccess(entries);
             }
         });
     }

@@ -31,7 +31,7 @@ public class XMPPClient {
     public void connect() throws XMPPException {
         XMPPConnection.DEBUG_ENABLED = true;
         final ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
-                "192.168.6.3", 5222, "wfc");
+                "192.168.6.9", 5222, "wfc");
         xmppConnection = new XMPPConnection(connectionConfig);
         xmppConnection.connect();
     }

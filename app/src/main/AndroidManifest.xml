@@ -18,6 +18,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.ChatService" android:exported="true">
+            <intent-filter>
+                <action android:name="com.brik.android.chat.service.ChatService"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

@@ -37,23 +37,11 @@ import roboguice.inject.InjectView;
  */
 public class ChatFragment extends RoboFragment {
 
-    private static final int NEW_MESSAGE = 0x01;
-
-    private static final String MESSAGE_TAG = "msg";
-
-    String userId = "123";
+    String userId = "123456";
 
     Chat chat;
 
     XMPPClient client = XMPPClient.getInstance();
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            super.handleMessage(msg);
-
-        }
-    };
 
     @InjectView(R.id.recyclerview)
     private RecyclerView recyclerView;
@@ -68,10 +56,15 @@ public class ChatFragment extends RoboFragment {
 
     private Context mContext;
 
+    private IChatService mService;
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
+        if(activity instanceof MainActivity) {
+            mService = ((MainActivity)activity).getIChatService();
+        }
     }
 
     @Nullable
@@ -88,7 +81,7 @@ public class ChatFragment extends RoboFragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setHasFixedSize(true);
 
-//        createChat();
+        createChat();
 
         sendView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,14 +195,13 @@ public class ChatFragment extends RoboFragment {
     }
 
     public void sendMessage(String message) {
-//        try {
+        try {
             Message m = new Message();
             m.setBody(message);
-            m.setFrom("123");
-//            chat.sendMessage(message);
+            chat.sendMessage(message);
             mAdapter.add(m);
-//        } catch (XMPPException e) {
-//            e.printStackTrace();
-//        }
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
     }
 }
