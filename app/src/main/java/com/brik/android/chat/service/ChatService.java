@@ -2,17 +2,14 @@ package com.brik.android.chat.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Messenger;
 import android.os.RemoteException;
 
 import com.brik.android.chat.ChatEventObservable;
-import com.brik.android.chat.Constants;
 import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 import com.brik.android.chat.db.entry.MessageConver;
-import com.brik.android.chat.db.entry.MessageDAO;
+import com.brik.android.chat.db.MessageDAO;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
@@ -24,6 +21,8 @@ import org.jivesoftware.smack.packet.Message;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import static org.jivesoftware.smack.packet.Message.*;
 
 /**
  * Created by wangfengchen on 15/6/26.
@@ -83,6 +82,7 @@ public class ChatService extends Service {
                     event.name = "haha";
                     ChatEventObservable.getInstance().successChanged(ConnectListener.class, event);
                     rec();
+                    getRoster();//测试
                 } catch (XMPPException e) {
                     e.printStackTrace();
                     ChatEventObservable.getInstance().failChanged(ConnectListener.class, e);
@@ -126,6 +126,13 @@ public class ChatService extends Service {
             @Override
             public void run() {
                 Collection<RosterEntry> entries = client.getRoster().getEntries();
+                if(entries!=null&&!entries.isEmpty()) {
+                    RosterEvent rosterEvent = new RosterEvent();
+                    rosterEvent.entries = entries;
+                    ChatEventObservable.getInstance().successChanged(RosterListener.class, rosterEvent);
+                }else {
+                    ChatEventObservable.getInstance().failChanged(RosterListener.class, null);
+                }
             }
         });
     }
@@ -141,7 +148,11 @@ public class ChatService extends Service {
                     public void chatCreated(Chat chat, boolean b) {
                         chat.addMessageListener(new MessageListener() {
                             public void processMessage(Chat newchat, Message message) {
-                                messageDAO.add(MessageConver.toOrmMessage(message));
+                                if(message.getType()==Type.chat) {
+                                        messageDAO.add(MessageConver.toOrmMessage(message));
+                                } else if(message.getType()==Type.error) {
+                                    System.out.println("error");
+                                }
                             }
                         });
                     }

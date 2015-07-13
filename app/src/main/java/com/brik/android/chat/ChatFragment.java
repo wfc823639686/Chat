@@ -1,13 +1,16 @@
 package com.brik.android.chat;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.media.Image;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,11 +22,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brik.android.chat.db.MessageDAO;
+import com.brik.android.chat.db.entry.MessageConver;
+import com.brik.android.chat.db.entry.OrmMessage;
 import com.brik.android.chat.service.ConnectEvent;
 import com.brik.android.chat.service.ConnectListener;
 import com.brik.android.chat.service.LoginEvent;
 import com.brik.android.chat.service.LoginListener;
 import com.google.inject.Inject;
+import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
@@ -32,6 +39,7 @@ import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,16 +49,17 @@ import roboguice.inject.InjectView;
 /**
  * Created by wangfengchen on 15/6/26.
  */
-public class ChatFragment extends RoboFragment {
+public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnRefreshListener{
 
-    String userId = "admin";
+    int p;
+
+    String userId = "admin@snowyoung.org";
 
     Chat chat;
 
     XMPPClient client = XMPPClient.getInstance();
 
-    @InjectView(R.id.recyclerview)
-    private RecyclerView recyclerView;
+    private SuperRecyclerView mRecycler;
 
     @InjectView(R.id.chat_send)
     private Button sendView;
@@ -95,6 +104,8 @@ public class ChatFragment extends RoboFragment {
         }
     };
 
+    private MessageDAO messageDAO;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +127,20 @@ public class ChatFragment extends RoboFragment {
         if(activity instanceof MainActivity) {
             mService = ((MainActivity)activity).getIChatService();
         }
+        messageDAO = new MessageDAO(getActivity());
+
+    }
+
+    void getMessageFromDB(int p) {
+        try {
+            List<OrmMessage> messages = messageDAO.getMessage(userId, p, 10);
+            for(OrmMessage ormMessage : messages) {
+                mAdapter.add(MessageConver.toMessage(ormMessage));
+            }
+            mRecycler.getSwipeToRefresh().setRefreshing(false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Nullable
@@ -124,22 +149,31 @@ public class ChatFragment extends RoboFragment {
         return inflater.inflate(R.layout.fargment_chat, container, false);
     }
 
+    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+    private void initSuperRecyclerView(View view) {
+        mRecycler = (SuperRecyclerView) view.findViewById(R.id.list);
+        mRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecycler.setRefreshListener(this);
+        mRecycler.setRefreshingColorResources(android.R.color.holo_orange_light, android.R.color.holo_blue_light, android.R.color.holo_green_light, android.R.color.holo_red_light);
+        mRecycler.setAdapter(mAdapter);
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        recyclerView.setAdapter(mAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setHasFixedSize(true);
-
-
-
+        initSuperRecyclerView(view);
+        getMessageFromDB(0);
         sendView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sendMessage("hahahahahaha");
             }
         });
+    }
+
+    @Override
+    public void onRefresh() {
+        getMessageFromDB(p++);
     }
 
     class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

@@ -1,8 +1,11 @@
-package com.brik.android.chat.db.entry;
+package com.brik.android.chat.db;
 
 import android.content.Context;
 
 import com.brik.android.chat.db.BaseDAO;
+import com.brik.android.chat.db.entry.OrmMessage;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -49,5 +52,11 @@ public class MessageDAO extends BaseDAO<OrmMessage> {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public List<OrmMessage> getMessage(String from,long offset, long limit) throws SQLException {
+        QueryBuilder<OrmMessage, Integer> queryBuilder  = dao.queryBuilder();
+        queryBuilder.where().eq("from", from);
+        return queryBuilder.offset(offset).limit(limit).query();
     }
 }
