@@ -10,6 +10,13 @@ import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 import com.brik.android.chat.db.entry.MessageConver;
 import com.brik.android.chat.db.MessageDAO;
+import com.brik.android.chat.service.event.ConnectEvent;
+import com.brik.android.chat.service.listener.ConnectListener;
+import com.brik.android.chat.service.listener.LoginListener;
+import com.brik.android.chat.service.event.MessageEvent;
+import com.brik.android.chat.service.listener.RegisterListener;
+import com.brik.android.chat.service.event.RosterEvent;
+import com.brik.android.chat.service.listener.RosterListener;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
@@ -149,7 +156,10 @@ public class ChatService extends Service {
                         chat.addMessageListener(new MessageListener() {
                             public void processMessage(Chat newchat, Message message) {
                                 if(message.getType()==Type.chat) {
-                                        messageDAO.add(MessageConver.toOrmMessage(message));
+                                    messageDAO.add(MessageConver.toOrmMessage(message));
+                                    MessageEvent messageEvent = new MessageEvent();
+                                    messageEvent.message = message;
+                                    ChatEventObservable.getInstance().successChanged(com.brik.android.chat.service.listener.MessageListener.class, messageEvent);
                                 } else if(message.getType()==Type.error) {
                                     System.out.println("error");
                                 }

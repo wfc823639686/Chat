@@ -1,6 +1,4 @@
-package com.brik.android.chat.service;
-
-import com.brik.android.chat.BaseEvent;
+package com.brik.android.chat.service.event;
 
 import org.jivesoftware.smack.RosterEntry;
 

@@ -3,6 +3,7 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
         <!-- Customize your theme here. -->
+        <item name="android:background">#fff</item>
     </style>
 
     <style name="Message">
@@ -28,5 +29,11 @@
     <style name="Label.DefLabel1">
         <item name="android:textSize">16sp</item>
     </style>
+
+    <declare-styleable name="templateview">
+        <attr format="reference" name="mainLayout"/>
+        <attr format="reference" name="contentLayoutId"/>
+        <attr format="reference" name="titleLayoutId"/>
+    </declare-styleable>
 
 </resources>

@@ -1,6 +1,6 @@
-package com.brik.android.chat.service;
+package com.brik.android.chat.service.listener;
 
-import com.brik.android.chat.BaseEventListener;
+import com.brik.android.chat.service.event.LoginEvent;
 
 /**
  * Created by wangfengchen on 15/7/8.

@@ -1,4 +1,6 @@
-package com.brik.android.chat;
+package com.brik.android.chat.service.listener;
+
+import com.brik.android.chat.service.event.BaseEvent;
 
 import java.util.Observer;
 

@@ -1,14 +1,10 @@
 package com.brik.android.chat;
 
-import com.brik.android.chat.service.ConnectListener;
-import com.brik.android.chat.service.LoginListener;
+import com.brik.android.chat.service.event.BaseEvent;
+import com.brik.android.chat.service.listener.Listener;
 import com.brik.android.chat.utils.MapUtils;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Created by wangfengchen on 15/7/8.

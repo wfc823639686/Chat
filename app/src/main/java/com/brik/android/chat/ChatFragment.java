@@ -3,15 +3,11 @@ package com.brik.android.chat;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.media.Image;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,20 +16,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.brik.android.chat.db.MessageDAO;
 import com.brik.android.chat.db.entry.MessageConver;
 import com.brik.android.chat.db.entry.OrmMessage;
-import com.brik.android.chat.service.ConnectEvent;
-import com.brik.android.chat.service.ConnectListener;
-import com.brik.android.chat.service.LoginEvent;
-import com.brik.android.chat.service.LoginListener;
+import com.brik.android.chat.service.event.ConnectEvent;
+import com.brik.android.chat.service.listener.ConnectListener;
+import com.brik.android.chat.service.event.LoginEvent;
+import com.brik.android.chat.service.listener.LoginListener;
+import com.brik.android.chat.service.event.MessageEvent;
 import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPException;
@@ -104,6 +99,23 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         }
     };
 
+    private com.brik.android.chat.service.listener.MessageListener messageListener =
+            new com.brik.android.chat.service.listener.MessageListener() {
+
+        @Override
+        public void onSuccess(MessageEvent data) {
+            Message message = data.message;
+            if(userId.equals(message.getFrom())) {
+                mAdapter.add(message);
+            }
+        }
+
+        @Override
+        public void onFail(Throwable throwable) {
+
+        }
+    };
+
     private MessageDAO messageDAO;
 
     @Override
@@ -111,6 +123,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         super.onCreate(savedInstanceState);
         ChatEventObservable.getInstance().register(connectListener);
         ChatEventObservable.getInstance().register(loginListener);
+        ChatEventObservable.getInstance().register(messageListener);
     }
 
     @Override
@@ -118,6 +131,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         super.onDestroy();
         ChatEventObservable.getInstance().unregister(connectListener);
         ChatEventObservable.getInstance().unregister(loginListener);
+        ChatEventObservable.getInstance().unregister(messageListener);
     }
 
     @Override
@@ -146,7 +160,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fargment_chat, container, false);
+        return inflater.inflate(R.layout.fragment_chat, container, false);
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
