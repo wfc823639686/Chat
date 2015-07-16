@@ -26,8 +26,12 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="Label.DefLabel1">
+    <style name="Label.H1">
         <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Edit" parent="Label">
+        <item name="android:background">@drawable/bg_edittext</item>
     </style>
 
     <declare-styleable name="templateview">

@@ -5,15 +5,19 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,6 +37,7 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.util.StringUtils;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -56,8 +61,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     private SuperRecyclerView mRecycler;
 
-    @InjectView(R.id.chat_send)
-    private Button sendView;
+    @InjectView(R.id.editText)
+    private EditText editText;
 
     @Inject
     private LayoutInflater layoutInflater;
@@ -99,22 +104,23 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         }
     };
 
-    private com.brik.android.chat.service.listener.MessageListener messageListener =
-            new com.brik.android.chat.service.listener.MessageListener() {
-
-        @Override
-        public void onSuccess(MessageEvent data) {
-            Message message = data.message;
-            if(userId.equals(message.getFrom())) {
-                mAdapter.add(message);
-            }
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-
-        }
-    };
+//    private com.brik.android.chat.service.listener.MessageListener messageListener =
+//            new com.brik.android.chat.service.listener.MessageListener() {
+//
+//        @Override
+//        public void onSuccess(MessageEvent data) {
+//            Message message = data.message;
+//            String[] fs = message.getFrom().split("/");
+//            if(userId.equals(fs[0])) {
+//                mAdapter.add(message);
+//            }
+//        }
+//
+//        @Override
+//        public void onFail(Throwable throwable) {
+//
+//        }
+//    };
 
     private MessageDAO messageDAO;
 
@@ -123,7 +129,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         super.onCreate(savedInstanceState);
         ChatEventObservable.getInstance().register(connectListener);
         ChatEventObservable.getInstance().register(loginListener);
-        ChatEventObservable.getInstance().register(messageListener);
+//        ChatEventObservable.getInstance().register(messageListener);
     }
 
     @Override
@@ -131,7 +137,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         super.onDestroy();
         ChatEventObservable.getInstance().unregister(connectListener);
         ChatEventObservable.getInstance().unregister(loginListener);
-        ChatEventObservable.getInstance().unregister(messageListener);
+//        ChatEventObservable.getInstance().unregister(messageListener);
     }
 
     @Override
@@ -176,11 +182,26 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initSuperRecyclerView(view);
+        initEditText();
         getMessageFromDB(0);
-        sendView.setOnClickListener(new View.OnClickListener() {
+    }
+
+    void initEditText() {
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
             @Override
-            public void onClick(View view) {
-                sendMessage("hahahahahaha");
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+
+                    String text = editText.getText().toString();
+                    if(!text.equals("")) {
+                        sendMessage(text);
+                        editText.setText("");
+                    }
+                    return true;
+                }
+                return false;
             }
         });
     }
@@ -196,7 +217,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
         public void add(Message item) {
             items.add(item);
-            notifyItemInserted(items.size()-1);
+//            notifyItemInserted(items.size()-1);
+            notifyDataSetChanged();
         }
 
         public Message getItem(int position) {
@@ -235,7 +257,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         public int getItemViewType(int position) {
 
             Message m = items.get(position);
-            if(userId.equals(m.getFrom())) return 1;
+
+            if(m.getFrom()!=null) return 1;
             return 0;
         }
     };
@@ -273,6 +296,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
     }
 
     void createChat() {
+        System.out.println("监听聊天消息...");
         chat = client.getChatManager().createChat(userId, null);
         // 监听聊天消息
         client.getChatManager().addChatListener(new ChatManagerListener() {
@@ -281,10 +305,15 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                 chat.addMessageListener(new MessageListener() {
 
                     @Override
-                    public void processMessage(Chat arg0, Message message) {
+                    public void processMessage(Chat arg0, final Message message) {
                         String result = message.getFrom() + ":" + message.getBody();
                         System.out.println(result);
-                        mAdapter.add(message);
+                        mRecycler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.add(message);
+                            }
+                        });
                     }
                 });
             }

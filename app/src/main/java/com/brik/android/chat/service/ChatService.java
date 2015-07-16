@@ -89,7 +89,6 @@ public class ChatService extends Service {
                     event.name = "haha";
                     ChatEventObservable.getInstance().successChanged(ConnectListener.class, event);
                     rec();
-                    getRoster();//测试
                 } catch (XMPPException e) {
                     e.printStackTrace();
                     ChatEventObservable.getInstance().failChanged(ConnectListener.class, e);
@@ -157,9 +156,9 @@ public class ChatService extends Service {
                             public void processMessage(Chat newchat, Message message) {
                                 if(message.getType()==Type.chat) {
                                     messageDAO.add(MessageConver.toOrmMessage(message));
-                                    MessageEvent messageEvent = new MessageEvent();
-                                    messageEvent.message = message;
-                                    ChatEventObservable.getInstance().successChanged(com.brik.android.chat.service.listener.MessageListener.class, messageEvent);
+//                                    MessageEvent messageEvent = new MessageEvent();
+//                                    messageEvent.message = message;
+//                                    ChatEventObservable.getInstance().successChanged(com.brik.android.chat.service.listener.MessageListener.class, messageEvent);
                                 } else if(message.getType()==Type.error) {
                                     System.out.println("error");
                                 }
