@@ -3,6 +3,8 @@ package com.brik.android.chat.db.entry;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import org.jivesoftware.smack.packet.Message;
+
 /**
  * Created by wangfengchen on 15/7/8.
  */
@@ -13,16 +15,18 @@ public class OrmMessage {
     private int id;
 
     @DatabaseField
-    private String type;
+    private String ormType;
 
     @DatabaseField
-    private String body;
+    private String ormBody;
 
     @DatabaseField
-    private String from;
+    private String ormFrom;
 
     @DatabaseField
-    private String to;
+    private String ormTo;
+
+    public int state;
 
     public int getId() {
         return id;
@@ -32,35 +36,35 @@ public class OrmMessage {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
+    public String getOrmType() {
+        return ormType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setOrmType(String ormType) {
+        this.ormType = ormType;
     }
 
-    public String getBody() {
-        return body;
+    public String getOrmBody() {
+        return ormBody;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setOrmBody(String ormBody) {
+        this.ormBody = ormBody;
     }
 
-    public String getFrom() {
-        return from;
+    public String getOrmFrom() {
+        return ormFrom;
     }
 
-    public void setFrom(String from) {
-        this.from = from;
+    public void setOrmFrom(String ormFrom) {
+        this.ormFrom = ormFrom;
     }
 
-    public String getTo() {
-        return to;
+    public String getOrmTo() {
+        return ormTo;
     }
 
-    public void setTo(String to) {
-        this.to = to;
+    public void setOrmTo(String ormTo) {
+        this.ormTo = ormTo;
     }
 }

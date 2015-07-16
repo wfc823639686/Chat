@@ -37,6 +37,7 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smack.util.StringUtils;
 
 import java.sql.SQLException;
@@ -217,8 +218,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
         public void add(Message item) {
             items.add(item);
-//            notifyItemInserted(items.size()-1);
-            notifyDataSetChanged();
+            notifyItemInserted(items.size()-1);
         }
 
         public Message getItem(int position) {
@@ -276,6 +276,10 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
         void bindView(Message m) {
             textView.setText(m.getBody());
+            XMPPError error = m.getError();
+            if(error.getCode()==-1) {
+                //重试
+            }
         }
     }
 
@@ -326,7 +330,11 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         try {
             Message m = new Message();
             m.setBody(message);
-            chat.sendMessage(message);
+            if(chat!=null) {
+                chat.sendMessage(message);
+            }else {//如果为空，则重试
+                m.setError(new XMPPError(-1));//发送失败，请重试
+            }
             mAdapter.add(m);
         } catch (XMPPException e) {
             e.printStackTrace();

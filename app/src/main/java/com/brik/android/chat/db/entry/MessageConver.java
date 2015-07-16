@@ -9,19 +9,19 @@ public class MessageConver {
 
     public static OrmMessage toOrmMessage(Message message) {
         OrmMessage ormMessage = new OrmMessage();
-        ormMessage.setType(message.getType().name());
-        ormMessage.setBody(message.getBody());
-        ormMessage.setFrom(message.getFrom());
-        ormMessage.setTo(message.getTo());
+        ormMessage.setOrmType(message.getType().name());
+        ormMessage.setOrmBody(message.getBody());
+        ormMessage.setOrmFrom(message.getFrom());
+        ormMessage.setOrmTo(message.getTo());
         return ormMessage;
     }
 
     public static Message toMessage(OrmMessage ormMessage) {
         Message message = new Message();
         message.setType(Message.Type.chat);
-        message.setBody(ormMessage.getBody());
-        message.setFrom(ormMessage.getFrom());
-        message.setTo(ormMessage.getTo());
+        message.setBody(ormMessage.getOrmBody());
+        message.setFrom(ormMessage.getOrmFrom());
+        message.setTo(ormMessage.getOrmTo());
         return message;
     }
 }
