@@ -2,9 +2,7 @@ package com.brik.android.chat.db;
 
 import android.content.Context;
 
-import com.brik.android.chat.db.BaseDAO;
-import com.brik.android.chat.db.entry.OrmMessage;
-import com.j256.ormlite.stmt.PreparedQuery;
+import com.brik.android.chat.db.entry.MessageWrapper;
 import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
@@ -13,7 +11,7 @@ import java.util.List;
 /**
  * Created by wangfengchen on 15/7/8.
  */
-public class MessageDAO extends BaseDAO<OrmMessage> {
+public class MessageDAO extends BaseDAO<MessageWrapper> {
 
     public MessageDAO(Context context) {
         super(context);
@@ -21,11 +19,11 @@ public class MessageDAO extends BaseDAO<OrmMessage> {
 
     @Override
     public void initDao() throws SQLException {
-        dao = getHelper().getDao(OrmMessage.class);
+        dao = getHelper().getDao(MessageWrapper.class);
     }
 
     @Override
-    public int add(OrmMessage ormMessage) {
+    public int add(MessageWrapper ormMessage) {
         try {
             return dao.create(ormMessage);
         } catch (SQLException e) {
@@ -35,17 +33,17 @@ public class MessageDAO extends BaseDAO<OrmMessage> {
     }
 
     @Override
-    public void edit(OrmMessage ormMessage) {
+    public void edit(MessageWrapper ormMessage) {
 
     }
 
     @Override
-    public int remove(OrmMessage ormMessage) {
+    public int remove(MessageWrapper ormMessage) {
         return 0;
     }
 
     @Override
-    public List<OrmMessage> listAll() {
+    public List<MessageWrapper> listAll() {
         try {
             return dao.queryForAll();
         } catch (SQLException e) {
@@ -54,9 +52,9 @@ public class MessageDAO extends BaseDAO<OrmMessage> {
         return null;
     }
 
-    public List<OrmMessage> getMessage(String from,long offset, long limit) throws SQLException {
-        QueryBuilder<OrmMessage, Integer> queryBuilder  = dao.queryBuilder();
-        queryBuilder.where().eq("from", from);
+    public List<MessageWrapper> getMessage(String from,long offset, long limit) throws SQLException {
+        QueryBuilder<MessageWrapper, Integer> queryBuilder  = dao.queryBuilder();
+        queryBuilder.where().eq("ormfrom", from);
         return queryBuilder.offset(offset).limit(limit).query();
     }
 }

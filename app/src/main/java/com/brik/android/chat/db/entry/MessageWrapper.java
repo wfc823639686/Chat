@@ -9,24 +9,36 @@ import org.jivesoftware.smack.packet.Message;
  * Created by wangfengchen on 15/7/8.
  */
 @DatabaseTable
-public class OrmMessage {
+public class MessageWrapper {
+
+    private Message message;
+
+    public MessageWrapper() {
+
+    }
+
+    public MessageWrapper(Message message) {
+        this.message = message;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public void setMessage(Message message) {
+        this.message = message;
+    }
 
     @DatabaseField(generatedId = true)
     private int id;
-
     @DatabaseField
     private String ormType;
-
     @DatabaseField
     private String ormBody;
-
     @DatabaseField
     private String ormFrom;
-
     @DatabaseField
     private String ormTo;
-
-    public int state;
 
     public int getId() {
         return id;
@@ -37,34 +49,34 @@ public class OrmMessage {
     }
 
     public String getOrmType() {
-        return ormType;
+        return message.getType().name();
     }
 
     public void setOrmType(String ormType) {
-        this.ormType = ormType;
+        message.setType(Message.Type.chat);
     }
 
     public String getOrmBody() {
-        return ormBody;
+        return message.getBody();
     }
 
     public void setOrmBody(String ormBody) {
-        this.ormBody = ormBody;
+        message.setBody(ormBody);
     }
 
     public String getOrmFrom() {
-        return ormFrom;
+        return message.getFrom();
     }
 
     public void setOrmFrom(String ormFrom) {
-        this.ormFrom = ormFrom;
+        message.setFrom(ormFrom);
     }
 
     public String getOrmTo() {
-        return ormTo;
+        return message.getTo();
     }
 
     public void setOrmTo(String ormTo) {
-        this.ormTo = ormTo;
+        message.setTo(ormTo);
     }
 }

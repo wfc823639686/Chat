@@ -68,6 +68,10 @@ public class XMPPClient {
         }
     }
 
+    public XMPPConnection getXMPPConnection() {
+        return xmppConnection;
+    }
+
     public void login(String username, String password) throws XMPPException {
         xmppConnection.login(username, password, "iphone 6终极土豪");
     }
