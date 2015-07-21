@@ -52,7 +52,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     int p;
 
-    String userId = "admin@snowyoung.org";
+    String user = "";
 
     Chat chat;
 
@@ -78,16 +78,12 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     private IChatService mService;
 
+    private MessageDAO messageDAO;
+
     private ConnectListener connectListener = new ConnectListener() {
         @Override
         public void onSuccess(ConnectEvent data) {
             System.out.println("连接成功");
-            System.out.println(data.name);
-            try {
-                mService.login("123456", "123456");
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override
@@ -100,15 +96,6 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         @Override
         public void onSuccess(LoginEvent data) {
             System.out.println("login成功");
-            switch (userType) {
-                case 1:
-                    createChat();
-                    break;
-                case 2:
-                    createMultiChat();
-                    break;
-            }
-
         }
 
         @Override
@@ -123,7 +110,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         public void onSuccess(MessageEvent data) {
             final Message message = data.message;
             String[] fs = message.getFrom().split("/");
-            if(userId.equals(fs[0])) {
+            if(user.equals(fs[0])) {
                 mRecycler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -139,14 +126,31 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         }
     };
 
-    private MessageDAO messageDAO;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //获取user
+        getData();
         ChatEventObservable.getInstance().register(connectListener);
         ChatEventObservable.getInstance().register(loginListener);
         ChatEventObservable.getInstance().register(messageListener);
+
+        switch (userType) {
+            case 1:
+                createChat();
+                break;
+            case 2:
+                createMultiChat();
+                break;
+        }
+    }
+
+    void getData() {
+        Bundle args = getArguments();
+        if(args!=null) {
+            user = args.getString("user", "");
+        }
     }
 
     @Override
@@ -161,8 +165,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
-        if(activity instanceof MainActivity) {
-            mService = ((MainActivity)activity).getIChatService();
+        if(activity instanceof ChatActivity) {
+            mService = ((ChatActivity)activity).getIChatService();
         }
         messageDAO = new MessageDAO(getActivity());
 
@@ -170,7 +174,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     void getMessageFromDB(int p) {
         try {
-            List<MessageWrapper> ormMessageList = messageDAO.getMessage(userId, p, 10);
+            List<MessageWrapper> ormMessageList = messageDAO.getMessage(user, p, 10);
             mAdapter.addAllAtStart(ormMessageList);
             mRecycler.getSwipeToRefresh().setRefreshing(false);
         } catch (SQLException e) {
@@ -327,7 +331,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     void createChat() {
         System.out.println("监听聊天消息...");
-        chat = client.getChatManager().createChat(userId, null);
+        chat = client.getChatManager().createChat(user, null);
 //        // 监听聊天消息
 //        client.getChatManager().addChatListener(new ChatManagerListener() {
 //            @Override

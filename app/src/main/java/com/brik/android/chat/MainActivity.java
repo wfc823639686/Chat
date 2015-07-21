@@ -15,6 +15,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.brik.android.chat.service.event.ConnectEvent;
+import com.brik.android.chat.service.event.LoginEvent;
+import com.brik.android.chat.service.listener.ConnectListener;
+import com.brik.android.chat.service.listener.LoginListener;
+
 import roboguice.activity.RoboFragmentActivity;
 
 
@@ -32,7 +37,6 @@ public class MainActivity extends RoboFragmentActivity {
             } catch (RemoteException e) {
                 e.printStackTrace();
             }
-            chat();
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
@@ -40,9 +44,40 @@ public class MainActivity extends RoboFragmentActivity {
         }
     };
 
-    void chat() {
-        ChatFragment chatFragment = new ChatFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.content, chatFragment, "chat").commit();
+    ConnectListener connectListener = new ConnectListener() {
+        @Override
+        public void onSuccess(ConnectEvent data) {
+            System.out.println("连接成功");
+            System.out.println(data.name);
+            try {
+                mService.login("123456", "123456");
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onFail(Throwable throwable) {
+            System.out.println("连接失败，" + throwable.getMessage());
+        }
+    };
+
+    LoginListener loginListener = new LoginListener() {
+        @Override
+        public void onSuccess(LoginEvent data) {
+            System.out.println("login成功");
+            contact();
+        }
+
+        @Override
+        public void onFail(Throwable throwable) {
+            System.out.println("login失败，" + throwable.getMessage());
+        }
+    };
+
+    void contact() {
+        ContactFragment contactFragment = new ContactFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.content, contactFragment, "contact").commit();
     }
 
     public IChatService getIChatService() {
@@ -59,12 +94,16 @@ public class MainActivity extends RoboFragmentActivity {
         intent.setPackage(getPackageName());
         bindService(intent, mConnection, BIND_AUTO_CREATE);
 
-
+        ChatEventObservable.getInstance().register(connectListener);
+        ChatEventObservable.getInstance().register(loginListener);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
+
+        ChatEventObservable.getInstance().unregister(connectListener);
+        ChatEventObservable.getInstance().unregister(loginListener);
     }
 }

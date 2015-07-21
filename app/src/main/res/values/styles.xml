@@ -31,9 +31,14 @@
     </style>
 
     <style name="TextEdit" parent="Label">
+        <item name="android:padding">6dp</item>
         <item name="android:singleLine">true</item>
         <item name="android:imeOptions">actionDone</item>
         <item name="android:background">@drawable/bg_edittext</item>
+    </style>
+
+    <style name="Name" parent="Label">
+        <item name="android:textSize">17sp</item>
     </style>
 
     <declare-styleable name="templateview">

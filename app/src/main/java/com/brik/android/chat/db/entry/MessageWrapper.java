@@ -8,7 +8,7 @@ import org.jivesoftware.smack.packet.Message;
 /**
  * Created by wangfengchen on 15/7/8.
  */
-@DatabaseTable
+@DatabaseTable(tableName="imessage")
 public class MessageWrapper {
 
     private Message message;

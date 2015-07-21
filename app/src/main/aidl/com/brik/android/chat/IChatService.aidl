@@ -16,4 +16,6 @@ interface IChatService {
     void login(String username, String password);
 
     void register();
+
+    void getRoster();
 }

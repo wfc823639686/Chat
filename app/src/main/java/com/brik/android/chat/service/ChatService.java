@@ -22,6 +22,7 @@ import com.brik.android.chat.service.listener.RosterListener;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
@@ -60,6 +61,11 @@ public class ChatService extends Service {
         @Override
         public void register() throws RemoteException {
             ChatService.this.register();
+        }
+
+        @Override
+        public void getRoster() throws RemoteException {
+            ChatService.this.getRoster();
         }
 
     };
@@ -132,14 +138,10 @@ public class ChatService extends Service {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                Collection<RosterEntry> entries = client.getRoster().getEntries();
-                if(entries!=null&&!entries.isEmpty()) {
-                    RosterEvent rosterEvent = new RosterEvent();
-                    rosterEvent.entries = entries;
-                    ChatEventObservable.getInstance().successChanged(RosterListener.class, rosterEvent);
-                }else {
-                    ChatEventObservable.getInstance().failChanged(RosterListener.class, null);
-                }
+                Roster roster = client.getRoster();
+                RosterEvent rosterEvent = new RosterEvent();
+                rosterEvent.roster = roster;
+                ChatEventObservable.getInstance().successChanged(RosterListener.class, rosterEvent);
             }
         });
     }
