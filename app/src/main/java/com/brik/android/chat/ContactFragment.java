@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,10 +28,16 @@ import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.muc.HostedRoom;
+import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.jivesoftware.smackx.packet.DiscoverItems;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import roboguice.fragment.RoboFragment;
 
@@ -39,6 +46,7 @@ import roboguice.fragment.RoboFragment;
  */
 public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.OnRefreshListener{
 
+    private static final String TAG = "ContactFragment";
     private SuperRecyclerView mRecycler;
 
     private MyAdapter mAdapter = new MyAdapter();
@@ -106,6 +114,51 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
 
         }
     };
+
+
+    /**
+     * 初始化聊服务会议列表
+     */
+    private void initHostRoom() {
+        Collection<HostedRoom> hostrooms;
+        try {
+            hostrooms = MultiUserChat.getHostedRooms(XMPPClient.getInstance().getXMPPConnection(),"snowyoung.org");
+            for (HostedRoom entry : hostrooms) {
+                Log.i(TAG, "名字：" + entry.getName() + " - ID:" + entry.getJid());
+            }
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 初始化房间列表
+     */
+    public void init(String jid) {
+        List<DiscoverItems.Item> listDiscoverItems = new ArrayList<>();
+        // 获得与XMPPConnection相关的ServiceDiscoveryManager
+        ServiceDiscoveryManager discoManager = ServiceDiscoveryManager
+                .getInstanceFor(XMPPClient.getInstance().getXMPPConnection());
+
+        // 获得指定XMPP实体的项目
+        // 这个例子获得与在线目录服务相关的项目
+        DiscoverItems discoItems;
+        try {
+            discoItems = discoManager.discoverItems(jid);
+            // 获得被查询的XMPP实体的要查看的项目
+            Iterator it = discoItems.getItems();
+            // 显示远端XMPP实体的项目
+            while (it.hasNext()) {
+                DiscoverItems.Item item = (DiscoverItems.Item) it.next();
+                System.out.println(item.getEntityID());
+                System.out.println(item.getName());
+                listDiscoverItems.add(item);
+            }
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

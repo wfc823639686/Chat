@@ -66,7 +66,8 @@ public class MainActivity extends RoboFragmentActivity {
         @Override
         public void onSuccess(LoginEvent data) {
             System.out.println("login成功");
-            contact();
+//            contact();
+            createMultiUserChat();
         }
 
         @Override
@@ -78,6 +79,11 @@ public class MainActivity extends RoboFragmentActivity {
     void contact() {
         ContactFragment contactFragment = new ContactFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.content, contactFragment, "contact").commit();
+    }
+
+    void createMultiUserChat() {
+        CreateMultiUserChatFragment fragment = new CreateMultiUserChatFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.content, fragment, "createmulti").commit();
     }
 
     public IChatService getIChatService() {
