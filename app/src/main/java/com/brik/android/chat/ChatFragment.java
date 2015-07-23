@@ -19,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.brik.android.chat.db.MessageDAO;
-import com.brik.android.chat.entry.MessageWrapper;
+import com.brik.android.chat.entry.IMessage;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.event.MessageEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
@@ -30,14 +30,8 @@ import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.filter.AndFilter;
-import org.jivesoftware.smack.filter.FromContainsFilter;
-import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.XMPPError;
@@ -119,7 +113,9 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                 mRecycler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter.add(new MessageWrapper(message));
+                        mAdapter.add(new IMessage(message));
+                        int count = mAdapter.getItemCount();
+                        mRecycler.getRecyclerView().scrollToPosition(count==0?0 : count-1);
                     }
                 });
             }
@@ -179,8 +175,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     void getMessageFromDB(int p) {
         try {
-            List<MessageWrapper> list = messageDAO.listAll();
-            List<MessageWrapper> ormMessageList = messageDAO.getMessage(user, p, 10);
+            List<IMessage> list = messageDAO.listAll();
+            List<IMessage> ormMessageList = messageDAO.getMessage(user, p, 10);
             mAdapter.addAllAtStart(ormMessageList);
             mRecycler.getSwipeToRefresh().setRefreshing(false);
         } catch (SQLException e) {
@@ -238,18 +234,18 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private List<MessageWrapper> items = new ArrayList<>();
+        private List<IMessage> items = new ArrayList<>();
 
-        public void add(MessageWrapper item) {
+        public void add(IMessage item) {
             items.add(item);
             notifyItemInserted(items.size() - 1);
         }
 
-        public void addAllAtStart(List<MessageWrapper> list) {
+        public void addAllAtStart(List<IMessage> list) {
             items.addAll(0, list);
         }
 
-        public MessageWrapper getItem(int position) {
+        public IMessage getItem(int position) {
             return items.get(position);
         }
 
@@ -284,7 +280,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         @Override
         public int getItemViewType(int position) {
 
-            MessageWrapper mw = items.get(position);
+            IMessage mw = items.get(position);
             Message m = mw.getMessage();
             String[] fs = m.getFrom().split("/");
             if(chat.getParticipant().equals(fs[0])) {
@@ -306,7 +302,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
             headView = (ImageView) itemView.findViewById(R.id.item_my_head);
         }
 
-        void bindView(MessageWrapper mw) {
+        void bindView(IMessage mw) {
             Message m = mw.getMessage();
             textView.setText(m.getBody());
             XMPPError error = m.getError();
@@ -329,7 +325,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
             headView = (ImageView) itemView.findViewById(R.id.item_other_head);
         }
 
-        void bindView(MessageWrapper mw) {
+        void bindView(IMessage mw) {
             Message m = mw.getMessage();
             textView.setText(m.getBody());
         }
@@ -357,7 +353,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                 mRecycler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mAdapter.add(new MessageWrapper(message));
+                        mAdapter.add(new IMessage(message));
                     }
                 });
             }
@@ -368,12 +364,12 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         try {
             Message m = new Message();
             m.setBody(message);
-            MessageWrapper mw = null;
+            IMessage mw = null;
             switch (userType) {
                 case 1://user
                     if(chat!=null) {
                         chat.sendMessage(m);
-                        mw = new MessageWrapper(m);
+                        mw = new IMessage(m);
                         messageDAO.add(mw);
                     }else {//如果为空，则重试
                         m.setError(new XMPPError(-1));//发送失败，请重试
@@ -387,8 +383,11 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                     }
                     break;
             }
-            if(mw!=null)
+            if(mw!=null) {
                 mAdapter.add(mw);
+                int count = mAdapter.getItemCount();
+                mRecycler.getRecyclerView().scrollToPosition(count==0?0:count-1);
+            }
         } catch (XMPPException e) {
             e.printStackTrace();
         }

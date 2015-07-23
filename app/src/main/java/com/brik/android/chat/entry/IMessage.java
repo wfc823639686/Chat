@@ -3,34 +3,14 @@ package com.brik.android.chat.entry;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.packet.Message;
 
 /**
  * Created by wangfengchen on 15/7/8.
  */
 @DatabaseTable(tableName="imessage")
-public class MessageWrapper {
-
-    private Message message;
-
-    public MessageWrapper() {}
-
-    public MessageWrapper(Message message) {
-        setMessage(message);
-    }
-
-    public Message getMessage() {
-        return message;
-    }
-
-    public void setMessage(Message message) {
-        this.message = message;
-        this.setFrom(message.getFrom());
-        this.setBody(message.getBody());
-        this.setTo(message.getTo());
-        this.setType(message.getType().name());
-        this.setThread(message.getThread());
-    }
+public class IMessage {
 
     @DatabaseField(generatedId = true)
     private int id;
@@ -42,8 +22,6 @@ public class MessageWrapper {
     private String from;
     @DatabaseField
     private String to;
-    @DatabaseField
-    private String thread;
 
     public int getId() {
         return id;
@@ -85,11 +63,26 @@ public class MessageWrapper {
         this.to = to;
     }
 
-    public String getThread() {
-        return thread;
+    public IMessage(){}
+
+    public IMessage(Message message) {
+        setMessage(message);
     }
 
-    public void setThread(String thread) {
-        this.thread = thread;
+    public void setMessage(Message message) {
+        setBody(message.getBody());
+        setFrom(message.getFrom());
+        setType(message.getType().name());
+        setTo(message.getTo());
     }
+
+    public Message getMessage() {
+        Message message = new Message();
+        message.setBody(getBody());
+        message.setFrom(getFrom());
+        message.setTo(getTo());
+        message.setType(Message.Type.fromString(getType()));
+        return message;
+    }
+
 }

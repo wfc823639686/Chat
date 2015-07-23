@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.brik.android.chat.entry.MessageWrapper;
+import com.brik.android.chat.entry.IMessage;
 import com.j256.ormlite.android.DatabaseTableConfigUtil;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
@@ -30,7 +30,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase, ConnectionSource connectionSource) {
         try {
             //            建立Commodity表
-            DatabaseTableConfig<MessageWrapper> config = DatabaseTableConfigUtil.fromClass(connectionSource, MessageWrapper.class);
+            DatabaseTableConfig<IMessage> config = DatabaseTableConfigUtil.fromClass(connectionSource, IMessage.class);
             TableUtils.createTableIfNotExists(connectionSource, config);
             Log.e(TAG, "onCreate tables -----> ");
         } catch (SQLException e) {
@@ -46,7 +46,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             Log.e(TAG, "onUpgrade tables -----> ");
             Log.e(TAG, "oldVersion -> "+oldVersion);
             Log.e(TAG, "newVersion -> "+newVersion);
-            TableUtils.dropTable(connectionSource, MessageWrapper.class, true);
+            TableUtils.dropTable(connectionSource, IMessage.class, true);
             onCreate(sqLiteDatabase, connectionSource);
         } catch (SQLException e) {
             Log.e(TAG, e.toString());

@@ -222,7 +222,9 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
 
 
         public void bindView(final Contact item) {
-            nameView.setText(item.getName());
+            String account = item.getUser().substring(0, item.getUser().indexOf('@'));
+            String name = item.getName();
+            nameView.setText((name==null?"":name)+"("+account+")");
             contentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

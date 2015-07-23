@@ -9,7 +9,7 @@ import com.brik.android.chat.ChatEventObservable;
 import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 import com.brik.android.chat.db.MessageDAO;
-import com.brik.android.chat.entry.MessageWrapper;
+import com.brik.android.chat.entry.IMessage;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
 import com.brik.android.chat.service.listener.IMessageListener;
@@ -156,7 +156,7 @@ public class ChatService extends Service {
                         chat.addMessageListener(new MessageListener() {
                             public void processMessage(Chat newchat, Message message) {
                                 if(message.getType()==Type.chat) {
-                                    messageDAO.add(new MessageWrapper(message));
+                                    messageDAO.add(new IMessage(message));
                                     MessageEvent messageEvent = new MessageEvent();
                                     messageEvent.message = message;
                                     ChatEventObservable.getInstance().successChanged(IMessageListener.class, messageEvent);
