@@ -16,8 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.brik.android.chat.db.MessageDAO;
-import com.brik.android.chat.db.entry.Contact;
+import com.brik.android.chat.entry.Contact;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.event.LoginEvent;
 import com.brik.android.chat.service.event.RosterEvent;

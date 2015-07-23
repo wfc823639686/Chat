@@ -9,7 +9,7 @@ import com.brik.android.chat.ChatEventObservable;
 import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 import com.brik.android.chat.db.MessageDAO;
-import com.brik.android.chat.db.entry.MessageWrapper;
+import com.brik.android.chat.entry.MessageWrapper;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
 import com.brik.android.chat.service.listener.IMessageListener;
@@ -23,11 +23,9 @@ import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

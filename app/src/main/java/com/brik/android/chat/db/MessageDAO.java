@@ -2,7 +2,7 @@ package com.brik.android.chat.db;
 
 import android.content.Context;
 
-import com.brik.android.chat.db.entry.MessageWrapper;
+import com.brik.android.chat.entry.MessageWrapper;
 import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
@@ -54,7 +54,7 @@ public class MessageDAO extends BaseDAO<MessageWrapper> {
 
     public List<MessageWrapper> getMessage(String from,long offset, long limit) throws SQLException {
         QueryBuilder<MessageWrapper, Integer> queryBuilder  = dao.queryBuilder();
-        queryBuilder.where().eq("ormfrom", from);
+        queryBuilder.where().like("from", "%"+from+"%").and().like("to", "%"+from+"%");
         return queryBuilder.offset(offset).limit(limit).query();
     }
 }

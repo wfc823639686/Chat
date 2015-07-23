@@ -1,9 +1,4 @@
-package com.brik.android.chat.db.entry;
-
-import org.jivesoftware.smack.Connection;
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
-import org.jivesoftware.smack.packet.RosterPacket;
+package com.brik.android.chat.entry;
 
 /**
  * Created by wangfengchen on 15/7/21.

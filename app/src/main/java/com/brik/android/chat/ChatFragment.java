@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,7 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.brik.android.chat.db.MessageDAO;
-import com.brik.android.chat.db.entry.MessageWrapper;
+import com.brik.android.chat.entry.MessageWrapper;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.event.MessageEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
@@ -31,8 +30,14 @@ import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.AndFilter;
+import org.jivesoftware.smack.filter.FromContainsFilter;
+import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.XMPPError;
@@ -174,6 +179,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     void getMessageFromDB(int p) {
         try {
+            List<MessageWrapper> list = messageDAO.listAll();
             List<MessageWrapper> ormMessageList = messageDAO.getMessage(user, p, 10);
             mAdapter.addAllAtStart(ormMessageList);
             mRecycler.getSwipeToRefresh().setRefreshing(false);
@@ -332,30 +338,6 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
     void createChat() {
         System.out.println("监听聊天消息...");
         chat = client.getChatManager().createChat(user, null);
-//        // 监听聊天消息
-//        client.getChatManager().addChatListener(new ChatManagerListener() {
-//            @Override
-//            public void chatCreated(final Chat chat, boolean b) {
-//                chat.addMessageListener(new IMessageListener() {
-//
-//                    @Override
-//                    public void processMessage(Chat arg0, final Message message) {
-//                        if(arg0==chat) {
-//                            String result = message.getFrom() + ":" + message.getBody();
-//                            System.out.println(result);
-//                            mRecycler.post(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    mAdapter.add((MessageWrapper)message);
-//                                }
-//                            });
-//                        }
-//                    }
-//                });
-//            }
-//        });
-
-
     }
 
     void createMultiChat() {
@@ -386,10 +368,13 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         try {
             Message m = new Message();
             m.setBody(message);
+            MessageWrapper mw = null;
             switch (userType) {
                 case 1://user
                     if(chat!=null) {
                         chat.sendMessage(m);
+                        mw = new MessageWrapper(m);
+                        messageDAO.add(mw);
                     }else {//如果为空，则重试
                         m.setError(new XMPPError(-1));//发送失败，请重试
                     }
@@ -402,7 +387,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                     }
                     break;
             }
-            mAdapter.add(new MessageWrapper(m));
+            if(mw!=null)
+                mAdapter.add(mw);
         } catch (XMPPException e) {
             e.printStackTrace();
         }
