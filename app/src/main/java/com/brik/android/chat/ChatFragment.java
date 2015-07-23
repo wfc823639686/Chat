@@ -59,7 +59,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     String multiUserRoom = "";
 
-    int userType = 1;
+    int userType;
 
     XMPPClient client = XMPPClient.getInstance();
 
@@ -151,6 +151,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         Bundle args = getArguments();
         if(args!=null) {
             user = args.getString("user", "");
+            multiUserRoom = args.getString("jid", "");
+            userType = args.getInt("type");
         }
     }
 
@@ -279,16 +281,19 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
         @Override
         public int getItemViewType(int position) {
-
+            //0 me 1 order
             IMessage mw = items.get(position);
             Message m = mw.getMessage();
             String[] fs = m.getFrom().split("/");
-            if(chat.getParticipant().equals(fs[0])) {
-                return 1;
-            }else {
-                return 0;
+            switch (userType) {
+                case 1:
+                    return chat.getParticipant().equals(fs[0]) ? 1 : 0;
+                case 2:
+                    return XMPPClient.getInstance().getUser().equals(fs[0]) ? 0 : 1;
             }
+            return -1;
         }
+
     };
 
     class MyViewHolder extends RecyclerView.ViewHolder {
@@ -378,6 +383,8 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                 case 2://room
                     if(muc!=null) {
                         muc.sendMessage(m);
+                        mw = new IMessage(m);
+                        messageDAO.add(mw);
                     }else {//如果为空，则重试
                         m.setError(new XMPPError(-1));//发送失败，请重试
                     }

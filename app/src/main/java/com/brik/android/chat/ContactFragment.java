@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,21 +29,19 @@ import com.malinskiy.superrecyclerview.SuperRecyclerView;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.jivesoftware.smackx.packet.DiscoverItems;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+
 import roboguice.fragment.RoboFragment;
 
 /**
  * Created by wangfengchen on 15/7/21.
  */
-public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.OnRefreshListener{
+public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = "ContactFragment";
     private SuperRecyclerView mRecycler;
@@ -83,13 +80,25 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
     private RosterListener rosterListener = new RosterListener() {
         @Override
         public void onSuccess(final RosterEvent data) {
-            final Collection<RosterEntry> entries = data.roster.getEntries();
-            if(entries!=null && !entries.isEmpty()) {
 
-                mRecycler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.clear();
+
+            mRecycler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.clear();
+                    Collection<RosterEntry> entries = data.roster.getEntries();
+                    Collection<HostedRoom> rooms = data.rooms;
+                    if (rooms != null && !rooms.isEmpty()) {
+                        for (HostedRoom room : rooms) {
+                            Contact ct = new Contact();
+                            ct.setName(room.getName());
+                            ct.setJid(room.getJid());
+                            ct.setType("group");
+                            mAdapter.add(ct);
+                        }
+                    }
+                    if (entries != null && !entries.isEmpty()) {
+
                         for (RosterEntry entry : entries) {
                             System.out.print(entry.getName() + " - " + entry.getUser() + " - "
                                     + entry.getType() + " - " + entry.getGroups().size());
@@ -104,9 +113,9 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
                             mAdapter.add(contact);
                         }
                     }
-                });
+                }
+            });
 
-            }
         }
 
         @Override
@@ -114,50 +123,6 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
 
         }
     };
-
-
-    /**
-     * 初始化聊服务会议列表
-     */
-    private void initHostRoom() {
-        Collection<HostedRoom> hostrooms;
-        try {
-            hostrooms = MultiUserChat.getHostedRooms(XMPPClient.getInstance().getXMPPConnection(),"snowyoung.org");
-            for (HostedRoom entry : hostrooms) {
-                Log.i(TAG, "名字：" + entry.getName() + " - ID:" + entry.getJid());
-            }
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 初始化房间列表
-     */
-    public void init(String jid) {
-        List<DiscoverItems.Item> listDiscoverItems = new ArrayList<>();
-        // 获得与XMPPConnection相关的ServiceDiscoveryManager
-        ServiceDiscoveryManager discoManager = ServiceDiscoveryManager
-                .getInstanceFor(XMPPClient.getInstance().getXMPPConnection());
-
-        // 获得指定XMPP实体的项目
-        // 这个例子获得与在线目录服务相关的项目
-        DiscoverItems discoItems;
-        try {
-            discoItems = discoManager.discoverItems(jid);
-            // 获得被查询的XMPP实体的要查看的项目
-            Iterator it = discoItems.getItems();
-            // 显示远端XMPP实体的项目
-            while (it.hasNext()) {
-                DiscoverItems.Item item = (DiscoverItems.Item) it.next();
-                System.out.println(item.getEntityID());
-                System.out.println(item.getName());
-                listDiscoverItems.add(item);
-            }
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-    }
 
 
     @Override
@@ -179,8 +144,8 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if(activity instanceof MainActivity) {
-            mService = ((MainActivity)activity).getIChatService();
+        if (activity instanceof MainActivity) {
+            mService = ((MainActivity) activity).getIChatService();
         }
     }
 
@@ -243,15 +208,25 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            if (viewType == 1) {
                 View view = layoutInflater.inflate(R.layout.item_contact, parent, false);
-                return new MyViewHolder(view);
-
+                return new GroupViewHolder(view);
+            } else {
+                View view = layoutInflater.inflate(R.layout.item_contact, parent, false);
+                return new UserViewHolder(view);
+            }
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-                MyViewHolder vh = (MyViewHolder) holder;
+            int viewType = getItemViewType(position);
+            if (viewType == 1) {
+                GroupViewHolder vh = (GroupViewHolder) holder;
                 vh.bindView(getItem(position));
+            } else {
+                UserViewHolder vh = (UserViewHolder) holder;
+                vh.bindView(getItem(position));
+            }
         }
 
         @Override
@@ -259,14 +234,22 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
             return items.size();
         }
 
+        @Override
+        public int getItemViewType(int position) {
+            Contact ct = getItem(position);
+            if ("group".equals(ct.getType())) {
+                return 1;
+            }
+            return 0;
+        }
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+    class UserViewHolder extends RecyclerView.ViewHolder {
         View contentView;
         ImageView headView;
         TextView nameView;
 
-        public MyViewHolder(View itemView) {
+        public UserViewHolder(View itemView) {
             super(itemView);
             contentView = itemView;
             headView = (ImageView) itemView.findViewById(R.id.item_contact_head);
@@ -277,17 +260,44 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
         public void bindView(final Contact item) {
             String account = item.getUser().substring(0, item.getUser().indexOf('@'));
             String name = item.getName();
-            nameView.setText((name==null?"":name)+"("+account+")");
+            nameView.setText((name == null ? "" : name) + "(" + account + ")");
             contentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(getActivity(), ChatActivity.class);
                     intent.putExtra("user", item.getUser());
+                    intent.putExtra("type", 1);
                     startActivity(intent);
                 }
             });
         }
     }
 
+    class GroupViewHolder extends RecyclerView.ViewHolder {
+        View contentView;
+        ImageView headView;
+        TextView nameView;
+
+        public GroupViewHolder(View itemView) {
+            super(itemView);
+            contentView = itemView;
+            headView = (ImageView) itemView.findViewById(R.id.item_contact_head);
+            nameView = (TextView) itemView.findViewById(R.id.item_contact_name);
+        }
+
+
+        public void bindView(final Contact item) {
+            nameView.setText(item.getName());
+            contentView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getActivity(), ChatActivity.class);
+                    intent.putExtra("jid", item.getJid());
+                    intent.putExtra("type", 2);
+                    startActivity(intent);
+                }
+            });
+        }
+    }
 
 }

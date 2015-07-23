@@ -66,8 +66,8 @@ public class MainActivity extends RoboFragmentActivity {
         @Override
         public void onSuccess(LoginEvent data) {
             System.out.println("login成功");
-//            contact();
-            createMultiUserChat();
+            contact();
+//            createMultiUserChat();
         }
 
         @Override

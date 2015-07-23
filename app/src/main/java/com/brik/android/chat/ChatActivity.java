@@ -14,7 +14,9 @@ import roboguice.activity.RoboFragmentActivity;
  */
 public class ChatActivity extends RoboFragmentActivity {
 
-    String user;
+    String user, jid;
+
+    int type;
 
     private IChatService mService;
 
@@ -34,6 +36,8 @@ public class ChatActivity extends RoboFragmentActivity {
         ChatFragment chatFragment = new ChatFragment();
         Bundle args = new Bundle();
         args.putString("user", user);
+        args.putString("jid", jid);
+        args.putInt("type", type);
         chatFragment.setArguments(args);
         getSupportFragmentManager().beginTransaction().add(R.id.content, chatFragment, "chat").commit();
     }
@@ -58,7 +62,8 @@ public class ChatActivity extends RoboFragmentActivity {
         Intent data = getIntent();
         if(data!=null) {
             user = data.getStringExtra("user");
-
+            jid = data.getStringExtra("jid");
+            type = data.getIntExtra("type", 0);
         }
     }
 

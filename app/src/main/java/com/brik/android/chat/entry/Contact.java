@@ -5,7 +5,7 @@ package com.brik.android.chat.entry;
  */
 public class Contact {
     public Contact() {}
-    private String name, user, type, status, from;
+    private String name, user, type, status, from, jid;
 
     public String getName() {
         return name;
@@ -45,5 +45,13 @@ public class Contact {
 
     public void setFrom(String from) {
         this.from = from;
+    }
+
+    public String getJid() {
+        return jid;
+    }
+
+    public void setJid(String jid) {
+        this.jid = jid;
     }
 }

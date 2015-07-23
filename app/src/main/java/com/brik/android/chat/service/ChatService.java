@@ -9,6 +9,7 @@ import com.brik.android.chat.ChatEventObservable;
 import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 import com.brik.android.chat.db.MessageDAO;
+import com.brik.android.chat.entry.Contact;
 import com.brik.android.chat.entry.IMessage;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
@@ -25,7 +26,10 @@ import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smackx.muc.HostedRoom;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -136,9 +140,19 @@ public class ChatService extends Service {
         executor.execute(new Runnable() {
             @Override
             public void run() {
+
+                Collection<HostedRoom> rooms =
+                        null;
+                try {
+                    rooms = MultiUserChat.getHostedRooms(XMPPClient.getInstance().getXMPPConnection(), "conference.snowyoung.org");
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
+
                 Roster roster = client.getRoster();
                 RosterEvent rosterEvent = new RosterEvent();
                 rosterEvent.roster = roster;
+                rosterEvent.rooms = rooms;
                 ChatEventObservable.getInstance().successChanged(RosterListener.class, rosterEvent);
             }
         });

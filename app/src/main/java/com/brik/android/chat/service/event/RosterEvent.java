@@ -2,6 +2,7 @@ package com.brik.android.chat.service.event;
 
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smackx.muc.HostedRoom;
 
 import java.util.Collection;
 
@@ -10,4 +11,5 @@ import java.util.Collection;
  */
 public class RosterEvent extends BaseEvent{
     public Roster roster;
+    public Collection<HostedRoom> rooms;
 }
