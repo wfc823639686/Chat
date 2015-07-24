@@ -177,7 +177,6 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     void getMessageFromDB(int p) {
         try {
-            List<IMessage> list = messageDAO.listAll();
             List<IMessage> ormMessageList = messageDAO.getMessage(user, p, 10);
             mAdapter.addAllAtStart(ormMessageList);
             mRecycler.getSwipeToRefresh().setRefreshing(false);
@@ -245,6 +244,7 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
         public void addAllAtStart(List<IMessage> list) {
             items.addAll(0, list);
+            notifyDataSetChanged();
         }
 
         public IMessage getItem(int position) {
@@ -382,6 +382,9 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
                     break;
                 case 2://room
                     if(muc!=null) {
+                        m.setTo(muc.getRoom());
+                        m.setType(Message.Type.groupchat);
+                        m.setFrom(XMPPClient.getInstance().getUser());
                         muc.sendMessage(m);
                         mw = new IMessage(m);
                         messageDAO.add(mw);

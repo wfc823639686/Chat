@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.brik.android.chat.common.BaseFragment;
+import com.brik.android.chat.common.OnOptionClickListener;
 import com.brik.android.chat.entry.Contact;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.event.LoginEvent;
@@ -41,7 +43,8 @@ import roboguice.fragment.RoboFragment;
 /**
  * Created by wangfengchen on 15/7/21.
  */
-public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.OnRefreshListener {
+public class ContactFragment extends BaseFragment
+        implements SwipeRefreshLayout.OnRefreshListener, OnOptionClickListener {
 
     private static final String TAG = "ContactFragment";
     private SuperRecyclerView mRecycler;
@@ -182,6 +185,11 @@ public class ContactFragment extends RoboFragment implements SwipeRefreshLayout.
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onOptionClick(View view) {
+
     }
 
     class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

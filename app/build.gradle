@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.brik.android.chat"
-        minSdkVersion 10
+        minSdkVersion 16
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
@@ -28,4 +28,5 @@ dependencies {
 
     compile 'com.malinskiy:superrecyclerview:1.1.0'
     compile files('libs/asmack-jse-buddycloud-2010.12.11.jar')
+    compile 'me.imid.swipebacklayout.lib:library:1.0.0'
 }

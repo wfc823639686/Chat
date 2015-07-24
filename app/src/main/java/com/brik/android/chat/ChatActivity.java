@@ -5,14 +5,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
+import android.view.View;
 
-import roboguice.activity.RoboFragmentActivity;
+import com.brik.android.chat.common.BaseActivity;
+import com.brik.android.chat.common.BaseFragment;
 
 /**
  * Created by wangfengchen on 15/7/21.
  */
-public class ChatActivity extends RoboFragmentActivity {
+public class ChatActivity extends BaseActivity {
 
     String user, jid;
 
@@ -58,6 +59,11 @@ public class ChatActivity extends RoboFragmentActivity {
         bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 
+    @Override
+    protected BaseFragment getFragmentByTag(String tag) {
+        return null;
+    }
+
     void getData() {
         Intent data = getIntent();
         if(data!=null) {
@@ -71,5 +77,10 @@ public class ChatActivity extends RoboFragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
+    }
+
+    @Override
+    public void onClick(View view) {
+
     }
 }

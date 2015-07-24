@@ -14,19 +14,33 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
+import com.brik.android.chat.common.BaseActivity;
+import com.brik.android.chat.common.BaseFragment;
+import com.brik.android.chat.common.OnOptionClickListener;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.event.LoginEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
 import com.brik.android.chat.service.listener.LoginListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import roboguice.activity.RoboFragmentActivity;
 
 
-public class MainActivity extends RoboFragmentActivity {
+public class MainActivity extends BaseActivity {
 
     private IChatService mService;
 
+    TextView titleView;
+
+    ImageButton titleOptionView;
+
+    BaseFragment currentFragment;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -66,8 +80,7 @@ public class MainActivity extends RoboFragmentActivity {
         @Override
         public void onSuccess(LoginEvent data) {
             System.out.println("login成功");
-            contact();
-//            createMultiUserChat();
+            currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
         }
 
         @Override
@@ -76,14 +89,14 @@ public class MainActivity extends RoboFragmentActivity {
         }
     };
 
-    void contact() {
-        ContactFragment contactFragment = new ContactFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.content, contactFragment, "contact").commit();
-    }
-
-    void createMultiUserChat() {
-        CreateMultiUserChatFragment fragment = new CreateMultiUserChatFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.content, fragment, "createmulti").commit();
+    @Override
+    protected BaseFragment getFragmentByTag(String tag) {
+        if(tag.equals("contact")) {
+            return new ContactFragment();
+        } else if(tag.equals("createmulti")){
+            return new CreateMultiUserChatFragment();
+        }
+        return null;
     }
 
     public IChatService getIChatService() {
@@ -95,6 +108,8 @@ public class MainActivity extends RoboFragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initTitleView();
+        onListener();
         //绑定进程B的服务
         Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
         intent.setPackage(getPackageName());
@@ -104,6 +119,16 @@ public class MainActivity extends RoboFragmentActivity {
         ChatEventObservable.getInstance().register(loginListener);
     }
 
+    void initTitleView() {
+        View view = setActionBarLayout(R.layout.layout_main_title);
+        titleView = (TextView) view.findViewById(R.id.main_title_text);
+        titleOptionView = (ImageButton) view.findViewById(R.id.main_title_right);
+    }
+
+    void onListener() {
+        titleOptionView.setOnClickListener(this);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -111,5 +136,18 @@ public class MainActivity extends RoboFragmentActivity {
 
         ChatEventObservable.getInstance().unregister(connectListener);
         ChatEventObservable.getInstance().unregister(loginListener);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.main_title_right:
+//                if(currentFragment!=null && currentFragment instanceof OnOptionClickListener) {
+//                    OnOptionClickListener listener = (OnOptionClickListener) currentFragment;
+//                    listener.onOptionClick(view);
+//                }
+                currentFragment = showFragments(R.id.content, "createmulti", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+                break;
+        }
     }
 }

@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.brik.android.chat.common.BaseFragment;
 import com.google.inject.Inject;
 
 import org.jivesoftware.smack.XMPPException;
@@ -29,7 +30,7 @@ import roboguice.inject.InjectView;
 /**
  * Created by wangfengchen on 15/7/23.
  */
-public class CreateMultiUserChatFragment extends RoboFragment implements View.OnClickListener{
+public class CreateMultiUserChatFragment extends BaseFragment implements View.OnClickListener{
 
     private MultiUserChat muc;
 

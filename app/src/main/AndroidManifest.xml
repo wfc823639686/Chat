@@ -12,7 +12,8 @@
         android:screenOrientation="landscape"
         android:configChanges="orientation">
         <activity
-            android:name=".MainActivity">
+            android:name=".MainActivity"
+            android:theme="@style/ActionBarTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,6 +23,11 @@
 
         <activity
             android:name=".ChatActivity">
+        </activity>
+
+        <activity
+            android:name=".TestWebViewActivity">
+
         </activity>
 
         <service android:name=".service.ChatService" android:exported="true">
