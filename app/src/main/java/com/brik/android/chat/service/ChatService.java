@@ -1,9 +1,11 @@
 package com.brik.android.chat.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.brik.android.chat.ChatEventObservable;
 import com.brik.android.chat.IChatService;
@@ -19,6 +21,8 @@ import com.brik.android.chat.service.event.MessageEvent;
 import com.brik.android.chat.service.listener.RegisterListener;
 import com.brik.android.chat.service.event.RosterEvent;
 import com.brik.android.chat.service.listener.RosterListener;
+import com.j256.ormlite.logger.Logger;
+import com.j256.ormlite.logger.LoggerFactory;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
@@ -30,6 +34,8 @@ import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,6 +45,8 @@ import static org.jivesoftware.smack.packet.Message.*;
  * Created by wangfengchen on 15/6/26.
  */
 public class ChatService extends Service {
+
+    Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     MessageDAO messageDAO;
 
@@ -82,7 +90,27 @@ public class ChatService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        logger.warn("onCreate -----------------");
+        Notification notification = new Notification();
+        notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
+        startForeground(getClass().hashCode(), notification);
         messageDAO = new MessageDAO(this);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.v("ChatService", "startCommand");
+        flags = START_STICKY;
+        return super.onStartCommand(intent, flags, startId);
+//      return START_REDELIVER_INTENT;
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        logger.warn("onDestroy -----------------");
+        stopForeground(false);
     }
 
     /**
@@ -169,12 +197,12 @@ public class ChatService extends Service {
                     public void chatCreated(Chat chat, boolean b) {
                         chat.addMessageListener(new MessageListener() {
                             public void processMessage(Chat newchat, Message message) {
-                                if(message.getType()==Type.chat) {
+                                if (message.getType() == Type.chat) {
                                     messageDAO.add(new IMessage(message));
                                     MessageEvent messageEvent = new MessageEvent();
                                     messageEvent.message = message;
                                     ChatEventObservable.getInstance().successChanged(IMessageListener.class, messageEvent);
-                                } else if(message.getType()==Type.error) {
+                                } else if (message.getType() == Type.error) {
                                     System.out.println("error");
                                 }
                             }

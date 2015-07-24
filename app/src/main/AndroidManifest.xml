@@ -30,6 +30,13 @@
 
         </activity>
 
+        <receiver android:name=".SystemReceiver">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.intent.action.TIME_TICK"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name=".service.ChatService" android:exported="true">
             <intent-filter>
                 <action android:name="com.brik.android.chat.service.ChatService"/>

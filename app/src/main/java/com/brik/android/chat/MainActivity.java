@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.brik.android.chat.common.BaseActivity;
 import com.brik.android.chat.common.BaseFragment;
 import com.brik.android.chat.common.OnOptionClickListener;
+import com.brik.android.chat.service.ChatService;
 import com.brik.android.chat.service.event.ConnectEvent;
 import com.brik.android.chat.service.event.LoginEvent;
 import com.brik.android.chat.service.listener.ConnectListener;
@@ -110,6 +111,7 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         initTitleView();
         onListener();
+        startService();
         //绑定进程B的服务
         Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
         intent.setPackage(getPackageName());
@@ -129,6 +131,12 @@ public class MainActivity extends BaseActivity {
         titleOptionView.setOnClickListener(this);
     }
 
+    void startService() {
+        Intent intent = new Intent(this, ChatService.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(intent);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -146,8 +154,8 @@ public class MainActivity extends BaseActivity {
 //                    OnOptionClickListener listener = (OnOptionClickListener) currentFragment;
 //                    listener.onOptionClick(view);
 //                }
-                currentFragment = showFragments(R.id.content, "createmulti", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
-                break;
+            currentFragment = showFragments(R.id.content, "createmulti", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+            break;
         }
     }
 }
