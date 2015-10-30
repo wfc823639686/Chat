@@ -6,21 +6,11 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
-
-import com.brik.android.chat.ChatEventObservable;
 import com.brik.android.chat.IChatService;
 import com.brik.android.chat.XMPPClient;
 import com.brik.android.chat.db.MessageDAO;
-import com.brik.android.chat.entry.Contact;
 import com.brik.android.chat.entry.IMessage;
-import com.brik.android.chat.service.event.ConnectEvent;
-import com.brik.android.chat.service.listener.ConnectListener;
-import com.brik.android.chat.service.listener.IMessageListener;
-import com.brik.android.chat.service.listener.LoginListener;
-import com.brik.android.chat.service.event.MessageEvent;
-import com.brik.android.chat.service.listener.RegisterListener;
-import com.brik.android.chat.service.event.RosterEvent;
-import com.brik.android.chat.service.listener.RosterListener;
+import com.google.inject.Inject;
 import com.j256.ormlite.logger.Logger;
 import com.j256.ormlite.logger.LoggerFactory;
 
@@ -34,49 +24,25 @@ import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import java.util.Collection;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import roboguice.service.RoboService;
 
 import static org.jivesoftware.smack.packet.Message.*;
 
 /**
  * Created by wangfengchen on 15/6/26.
  */
-public class ChatService extends Service {
+public class ChatService extends RoboService {
 
     Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     MessageDAO messageDAO;
-
-    XMPPClient client = XMPPClient.getInstance();
+    @Inject
+    XMPPClient client;
 
     private IChatService.Stub mService = new IChatService.Stub() {
-        @Override
-        public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
-
-        }
-
-        @Override
-        public void connect() throws RemoteException {
-            ChatService.this.connect();
-        }
-
-        @Override
-        public void login(String username, String password) throws RemoteException {
-            ChatService.this.login(username, password);
-        }
-
-        @Override
-        public void register() throws RemoteException {
-            ChatService.this.register();
-        }
-
-        @Override
-        public void getRoster() throws RemoteException {
-            ChatService.this.getRoster();
-        }
 
     };
 
@@ -85,7 +51,8 @@ public class ChatService extends Service {
         return mService;
     }
 
-    ExecutorService executor = Executors.newCachedThreadPool();
+    @Inject
+    ExecutorService executor;
 
     @Override
     public void onCreate() {
@@ -95,6 +62,7 @@ public class ChatService extends Service {
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
         messageDAO = new MessageDAO(this);
+        rec();
     }
 
     @Override
@@ -113,79 +81,6 @@ public class ChatService extends Service {
         stopForeground(false);
     }
 
-    /**
-     * 连接
-     */
-    public void connect() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    client.connect();
-                    ConnectEvent event = new ConnectEvent();
-                    event.name = "haha";
-                    ChatEventObservable.getInstance().successChanged(ConnectListener.class, event);
-                    rec();
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                    ChatEventObservable.getInstance().failChanged(ConnectListener.class, e);
-                }
-            }
-        });
-    }
-
-    public void login(final String username, final String password) {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    client.login(username, password);
-                    ChatEventObservable.getInstance().successChanged(LoginListener.class);
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                    ChatEventObservable.getInstance().failChanged(LoginListener.class, e);
-                }
-            }
-        });
-    }
-
-    public void register() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    client.register();
-                    ChatEventObservable.getInstance().successChanged(RegisterListener.class);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    ChatEventObservable.getInstance().failChanged(RegisterListener.class, e);
-                }
-            }
-        });
-    }
-
-    public void getRoster() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                Collection<HostedRoom> rooms =
-                        null;
-                try {
-                    rooms = MultiUserChat.getHostedRooms(XMPPClient.getInstance().getXMPPConnection(), "conference.snowyoung.org");
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                }
-
-                Roster roster = client.getRoster();
-                RosterEvent rosterEvent = new RosterEvent();
-                rosterEvent.roster = roster;
-                rosterEvent.rooms = rooms;
-                ChatEventObservable.getInstance().successChanged(RosterListener.class, rosterEvent);
-            }
-        });
-    }
-
     public void rec() {
         System.out.println("开始接收");
         executor.execute(new Runnable() {
@@ -199,9 +94,6 @@ public class ChatService extends Service {
                             public void processMessage(Chat newchat, Message message) {
                                 if (message.getType() == Type.chat) {
                                     messageDAO.add(new IMessage(message));
-                                    MessageEvent messageEvent = new MessageEvent();
-                                    messageEvent.message = message;
-                                    ChatEventObservable.getInstance().successChanged(IMessageListener.class, messageEvent);
                                 } else if (message.getType() == Type.error) {
                                     System.out.println("error");
                                 }

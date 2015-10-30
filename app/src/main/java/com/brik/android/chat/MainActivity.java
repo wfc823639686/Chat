@@ -22,10 +22,7 @@ import com.brik.android.chat.common.BaseActivity;
 import com.brik.android.chat.common.BaseFragment;
 import com.brik.android.chat.common.OnOptionClickListener;
 import com.brik.android.chat.service.ChatService;
-import com.brik.android.chat.service.event.ConnectEvent;
-import com.brik.android.chat.service.event.LoginEvent;
-import com.brik.android.chat.service.listener.ConnectListener;
-import com.brik.android.chat.service.listener.LoginListener;
+import com.google.inject.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +31,9 @@ import roboguice.activity.RoboFragmentActivity;
 
 
 public class MainActivity extends BaseActivity {
+
+    @Inject
+    XMPPClient client;
 
     private IChatService mService;
 
@@ -47,46 +47,10 @@ public class MainActivity extends BaseActivity {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = IChatService.Stub.asInterface(service);
-            try {
-                mService.connect();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
 
-        }
-    };
-
-    ConnectListener connectListener = new ConnectListener() {
-        @Override
-        public void onSuccess(ConnectEvent data) {
-            System.out.println("连接成功");
-            System.out.println(data.name);
-            try {
-                mService.login("123456", "123456");
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-            System.out.println("连接失败，" + throwable.getMessage());
-        }
-    };
-
-    LoginListener loginListener = new LoginListener() {
-        @Override
-        public void onSuccess(LoginEvent data) {
-            System.out.println("login成功");
-            currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-            System.out.println("login失败，" + throwable.getMessage());
         }
     };
 
@@ -111,14 +75,7 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         initTitleView();
         onListener();
-        startService();
-        //绑定进程B的服务
-        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
-        intent.setPackage(getPackageName());
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
-
-        ChatEventObservable.getInstance().register(connectListener);
-        ChatEventObservable.getInstance().register(loginListener);
+        initXMPP();
     }
 
     void initTitleView() {
@@ -131,6 +88,39 @@ public class MainActivity extends BaseActivity {
         titleOptionView.setOnClickListener(this);
     }
 
+    void initXMPP() {
+
+        client.connect(new XMPPClient.ConnectListener() {
+            @Override
+            public void onSuccess() {
+                Log.d("connect", "成功");
+                client.login("123456", "123456", new XMPPClient.LoginListener() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d("login", "成功");
+
+                        startService();
+                        //绑定进程B的服务
+                        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
+                        intent.setPackage(getPackageName());
+                        bindService(intent, mConnection, BIND_AUTO_CREATE);
+                        currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+                    }
+
+                    @Override
+                    public void onFail(Throwable t) {
+                        Log.e("login", "失败", t);
+                    }
+                });
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+                Log.e("connect", "失败", t);
+            }
+        });
+    }
+
     void startService() {
         Intent intent = new Intent(this, ChatService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -141,9 +131,6 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
-
-        ChatEventObservable.getInstance().unregister(connectListener);
-        ChatEventObservable.getInstance().unregister(loginListener);
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.brik.android.chat;
 
 import android.util.Log;
 
+import com.google.inject.Inject;
+
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketCollector;
@@ -42,11 +44,29 @@ import org.jivesoftware.smackx.provider.XHTMLExtensionProvider;
 import org.jivesoftware.smackx.search.UserSearch;
 
 import java.lang.String;import java.lang.System;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by wangfengchen on 15/6/26.
  */
 public class XMPPClient {
+
+    public interface ConnectListener {
+        void onSuccess();
+        void onFail(Throwable t);
+    }
+
+    public interface RosterListener {
+        void onComplete(Roster roster);
+    }
+
+    public interface LoginListener {
+        void onSuccess();
+        void onFail(Throwable t);
+    }
+
+    @Inject
+    ExecutorService executor;
 
     private XMPPConnection xmppConnection;
 
@@ -63,6 +83,20 @@ public class XMPPClient {
         xmppConnection = new XMPPConnection(connectionConfig);
         xmppConnection.connect();
         configure(ProviderManager.getInstance());
+    }
+
+    public void connect(final ConnectListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    connect();
+                    listener.onSuccess();
+                } catch (XMPPException e) {
+                    listener.onFail(e);
+                }
+            }
+        });
     }
 
     public void register() {
@@ -109,12 +143,35 @@ public class XMPPClient {
         xmppConnection.login(username, password, "iphone 6终极土豪");
     }
 
+    public void login(final String username, final String password, final LoginListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    login(username, password);
+                    listener.onSuccess();
+                } catch (XMPPException e) {
+                    listener.onFail(e);
+                }
+            }
+        });
+    }
+
     public String getUser() {
         return "123456@snowyoung.org";
     }
 
     public Roster getRoster() {
         return xmppConnection.getRoster();
+    }
+
+    public void getRoster(final RosterListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                listener.onComplete(getRoster());
+            }
+        });
     }
 
     public ChatManager getChatManager() {

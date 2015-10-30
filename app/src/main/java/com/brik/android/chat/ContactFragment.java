@@ -19,15 +19,10 @@ import android.widget.TextView;
 import com.brik.android.chat.common.BaseFragment;
 import com.brik.android.chat.common.OnOptionClickListener;
 import com.brik.android.chat.entry.Contact;
-import com.brik.android.chat.service.event.ConnectEvent;
-import com.brik.android.chat.service.event.LoginEvent;
-import com.brik.android.chat.service.event.RosterEvent;
-import com.brik.android.chat.service.listener.ConnectListener;
-import com.brik.android.chat.service.listener.LoginListener;
-import com.brik.android.chat.service.listener.RosterListener;
 import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
@@ -46,7 +41,6 @@ import roboguice.fragment.RoboFragment;
 public class ContactFragment extends BaseFragment
         implements SwipeRefreshLayout.OnRefreshListener, OnOptionClickListener {
 
-    private static final String TAG = "ContactFragment";
     private SuperRecyclerView mRecycler;
 
     private MyAdapter mAdapter = new MyAdapter();
@@ -55,93 +49,18 @@ public class ContactFragment extends BaseFragment
 
     @Inject
     private LayoutInflater layoutInflater;
-
-    private ConnectListener connectListener = new ConnectListener() {
-        @Override
-        public void onSuccess(ConnectEvent data) {
-            System.out.println("连接成功");
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-            System.out.println("连接失败，" + throwable.getMessage());
-        }
-    };
-
-    private LoginListener loginListener = new LoginListener() {
-        @Override
-        public void onSuccess(LoginEvent data) {
-            System.out.println("login成功");
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-            System.out.println("login失败，" + throwable.getMessage());
-        }
-    };
-
-    private RosterListener rosterListener = new RosterListener() {
-        @Override
-        public void onSuccess(final RosterEvent data) {
-
-
-            mRecycler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter.clear();
-                    Collection<RosterEntry> entries = data.roster.getEntries();
-                    Collection<HostedRoom> rooms = data.rooms;
-                    if (rooms != null && !rooms.isEmpty()) {
-                        for (HostedRoom room : rooms) {
-                            Contact ct = new Contact();
-                            ct.setName(room.getName());
-                            ct.setJid(room.getJid());
-                            ct.setType("group");
-                            mAdapter.add(ct);
-                        }
-                    }
-                    if (entries != null && !entries.isEmpty()) {
-
-                        for (RosterEntry entry : entries) {
-                            System.out.print(entry.getName() + " - " + entry.getUser() + " - "
-                                    + entry.getType() + " - " + entry.getGroups().size());
-                            Presence presence = data.roster.getPresence(entry.getUser());
-                            System.out.println(" - " + presence.getStatus() + " - "
-                                    + presence.getFrom());
-                            final Contact contact = new Contact();
-                            contact.setName(entry.getName());
-                            contact.setUser(entry.getUser());
-                            contact.setStatus(presence.getStatus());
-                            contact.setFrom(presence.getFrom());
-                            mAdapter.add(contact);
-                        }
-                    }
-                }
-            });
-
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-
-        }
-    };
+    @Inject
+    XMPPClient client;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ChatEventObservable.getInstance().register(connectListener);
-        ChatEventObservable.getInstance().register(loginListener);
-        ChatEventObservable.getInstance().register(rosterListener);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ChatEventObservable.getInstance().unregister(connectListener);
-        ChatEventObservable.getInstance().unregister(loginListener);
-        ChatEventObservable.getInstance().unregister(rosterListener);
     }
 
     @Override
@@ -180,11 +99,28 @@ public class ContactFragment extends BaseFragment
     }
 
     void getContact() {
-        try {
-            mService.getRoster();
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        client.getRoster(new XMPPClient.RosterListener() {
+            @Override
+            public void onComplete(Roster roster) {
+                Collection<RosterEntry> entries = roster.getEntries();
+                if (entries != null && !entries.isEmpty()) {
+
+                    for (RosterEntry entry : entries) {
+                        System.out.print(entry.getName() + " - " + entry.getUser() + " - "
+                                + entry.getType() + " - " + entry.getGroups().size());
+                        Presence presence = roster.getPresence(entry.getUser());
+                        System.out.println(" - " + presence.getStatus() + " - "
+                                + presence.getFrom());
+                        final Contact contact = new Contact();
+                        contact.setName(entry.getName());
+                        contact.setUser(entry.getUser());
+                        contact.setStatus(presence.getStatus());
+                        contact.setFrom(presence.getFrom());
+                        mAdapter.add(contact);
+                    }
+                }
+            }
+        });
     }
 
     @Override

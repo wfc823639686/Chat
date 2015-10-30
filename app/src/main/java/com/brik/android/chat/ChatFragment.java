@@ -20,12 +20,6 @@ import android.widget.TextView;
 
 import com.brik.android.chat.db.MessageDAO;
 import com.brik.android.chat.entry.IMessage;
-import com.brik.android.chat.service.event.ConnectEvent;
-import com.brik.android.chat.service.event.MessageEvent;
-import com.brik.android.chat.service.listener.ConnectListener;
-import com.brik.android.chat.service.event.LoginEvent;
-import com.brik.android.chat.service.listener.IMessageListener;
-import com.brik.android.chat.service.listener.LoginListener;
 import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
@@ -79,53 +73,6 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     private MessageDAO messageDAO;
 
-    private ConnectListener connectListener = new ConnectListener() {
-        @Override
-        public void onSuccess(ConnectEvent data) {
-            System.out.println("连接成功");
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-            System.out.println("连接失败，" + throwable.getMessage());
-        }
-    };
-
-    private LoginListener loginListener = new LoginListener() {
-        @Override
-        public void onSuccess(LoginEvent data) {
-            System.out.println("login成功");
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-            System.out.println("login失败，" + throwable.getMessage());
-        }
-    };
-
-    private IMessageListener messageListener = new IMessageListener() {
-
-        @Override
-        public void onSuccess(MessageEvent data) {
-            final Message message = data.message;
-            String[] fs = message.getFrom().split("/");
-            if(user.equals(fs[0])) {
-                mRecycler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.add(new IMessage(message));
-                        int count = mAdapter.getItemCount();
-                        mRecycler.getRecyclerView().scrollToPosition(count==0?0 : count-1);
-                    }
-                });
-            }
-        }
-
-        @Override
-        public void onFail(Throwable throwable) {
-
-        }
-    };
 
 
     @Override
@@ -133,9 +80,6 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         super.onCreate(savedInstanceState);
         //获取user
         getData();
-        ChatEventObservable.getInstance().register(connectListener);
-        ChatEventObservable.getInstance().register(loginListener);
-        ChatEventObservable.getInstance().register(messageListener);
 
         switch (userType) {
             case 1:
@@ -159,9 +103,6 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ChatEventObservable.getInstance().unregister(connectListener);
-        ChatEventObservable.getInstance().unregister(loginListener);
-        ChatEventObservable.getInstance().unregister(messageListener);
     }
 
     @Override
