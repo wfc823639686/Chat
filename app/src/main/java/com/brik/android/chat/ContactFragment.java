@@ -116,7 +116,13 @@ public class ContactFragment extends BaseFragment
                         contact.setUser(entry.getUser());
                         contact.setStatus(presence.getStatus());
                         contact.setFrom(presence.getFrom());
-                        mAdapter.add(contact);
+
+                        mRecycler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.add(contact);
+                            }
+                        });
                     }
                 }
             }
