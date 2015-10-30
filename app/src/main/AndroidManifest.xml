@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.brik.android.chat" >
+    package="com.brik.chat.android" >
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -38,7 +38,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".service.ChatService" android:exported="true">
+        <service android:name="com.brik.chat.service.ChatService" android:exported="true">
             <intent-filter>
                 <action android:name="com.brik.android.chat.service.ChatService"/>
             </intent-filter>

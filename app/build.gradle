@@ -5,7 +5,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "com.brik.android.chat"
+        applicationId "com.brik.chat.android"
         minSdkVersion 16
         targetSdkVersion 21
         versionCode 1
