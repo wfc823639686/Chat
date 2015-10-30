@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import roboguice.activity.RoboFragmentActivity;
@@ -81,5 +83,20 @@ public abstract class BaseActivity extends RoboFragmentActivity implements View.
 
     public void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    public void pop(int v, boolean refresh) {
+        int entryCount = fragmentManager.getBackStackEntryCount();
+        int i = entryCount - v;
+//        List<Fragment> fragmentList = fragmentManager.getFragments();
+//        if (fragmentList != null && !fragmentList.isEmpty() && i > 0) {
+//            Fragment f = fragmentList.get(i - 1);
+//            if (refresh && f instanceof PageFragment) {
+//                ((PageFragment) f).onRefresh();//刷新该page
+//            }
+//        }
+        if (i >= 0) {
+            fragmentManager.popBackStack(i, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
     }
 }

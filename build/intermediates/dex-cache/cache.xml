@@ -2,41 +2,6 @@
 <items version="2" >
 
     <item
-        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/me.imid.swipebacklayout.lib/library/1.0.0/jars/classes.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="6d0958dbac8e7be76690b8e85d91698dfadbd81e">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-3d431d7c2fa9a07377c375be81e68eb0ddc95547.jar" />
-    </item>
-    <item
-        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.malinskiy/superrecyclerview/1.1.0/jars/classes.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="4649d32a5916687ff5d8e430aacb9a4e4eb10724">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-04e7ea4c9e26677b2efbfd69e88b4167b7e652e0.jar" />
-    </item>
-    <item
-        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/aopalliance/aopalliance/1.0/235ba8b489512805ac13a8f9ea77a1ca5ebe3e8/aopalliance-1.0.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="0235ba8b489512805ac13a8f9ea77a1ca5ebe3e8">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/aopalliance-1.0-8cc85f385d79ef07f71700407a58c3fc48a2123c.jar" />
-    </item>
-    <item
-        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/com.google.inject/guice/3.0/28586dc97c525501329d9a242fc3402041e3572d/guice-3.0-no_aop.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="28586dc97c525501329d9a242fc3402041e3572d">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/guice-3.0-no_aop-d6cbf2268b40b31e98953b74b0fbaa9fc5fbbf15.jar" />
-    </item>
-    <item
-        jar="/Users/wangfengchen/project/android/android-sdks/extras/android/m2repository/com/android/support/support-annotations/22.1.1/support-annotations-22.1.1.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="01d051a6bfb1218b1db2d3a5af0480ac2c25c42a">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/support-annotations-22.1.1-1b10c0640310490c40965074c31b86f0e8c25301.jar" />
-    </item>
-    <item
         jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/com.j256.ormlite/ormlite-core/4.48/e579bd2905d0399af5029aaaf9817d5fa0ca88a5/ormlite-core-4.48.jar"
         jumboMode="false"
         revision="21.1.2"
@@ -51,6 +16,13 @@
         <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/library-2.4.0-e58858b65efe2fe0c53e42fd050b88abaaacfc03.jar" />
     </item>
     <item
+        jar="/Users/wangfengchen/project/android/android-sdks/extras/android/m2repository/com/android/support/support-annotations/22.1.1/support-annotations-22.1.1.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="01d051a6bfb1218b1db2d3a5af0480ac2c25c42a">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/support-annotations-22.1.1-1b10c0640310490c40965074c31b86f0e8c25301.jar" />
+    </item>
+    <item
         jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/jars/classes.jar"
         jumboMode="false"
         revision="21.1.2"
@@ -58,25 +30,11 @@
         <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-72a8774118f7b4ce9d4e6a6f645d0c50cd2638cf.jar" />
     </item>
     <item
-        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/jars/libs/internal_impl-22.1.1.jar"
+        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/org.roboguice/roboguice/2.0/727ccb8f376109d0b5c44abca6f791dccc5c5dbc/roboguice-2.0.jar"
         jumboMode="false"
         revision="21.1.2"
-        sha1="9e070ad32b2700b0343e8e0cccc437733d91ba3a">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/internal_impl-22.1.1-31f64b0334db2be610bf6b2eecdcc1a56060a033.jar" />
-    </item>
-    <item
-        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/asm/asm/3.1/c157def142714c544bdea2e6144645702adf7097/asm-3.1.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="c157def142714c544bdea2e6144645702adf7097">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/asm-3.1-f5115b7846613545a37309defb33d71aca53b769.jar" />
-    </item>
-    <item
-        jar="/Users/wangfengchen/Chat/app/libs/asmack-jse-buddycloud-2010.12.11.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="dcc95a6390689f2b03ca2f9b7df9f65ccfc24893">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/asmack-jse-buddycloud-2010.12.11-2cc6c0bd92bb321ec1714cb7b1c8731fb66382e1.jar" />
+        sha1="727ccb8f376109d0b5c44abca6f791dccc5c5dbc">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/roboguice-2.0-2a8e8f48a7a38fcefb14a859a44103373058d087.jar" />
     </item>
     <item
         jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/com.j256.ormlite/ormlite-android/4.48/afa06f539a4026c10b247386312aa67404b80a16/ormlite-android-4.48.jar"
@@ -86,18 +44,18 @@
         <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/ormlite-android-4.48-f0430c972ee2d519dfb03d7c619d1f1ec73e66a7.jar" />
     </item>
     <item
-        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/org.sonatype.sisu.inject/cglib/2.2.1-v20090111/7ce5e983fd0e6c78346f4c9cbfa39d83049dda2/cglib-2.2.1-v20090111.jar"
+        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/aopalliance/aopalliance/1.0/235ba8b489512805ac13a8f9ea77a1ca5ebe3e8/aopalliance-1.0.jar"
         jumboMode="false"
         revision="21.1.2"
-        sha1="07ce5e983fd0e6c78346f4c9cbfa39d83049dda2">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/cglib-2.2.1-v20090111-327a5254599bbcbbb3baec97523f35c3a8235cdc.jar" />
+        sha1="0235ba8b489512805ac13a8f9ea77a1ca5ebe3e8">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/aopalliance-1.0-8cc85f385d79ef07f71700407a58c3fc48a2123c.jar" />
     </item>
     <item
-        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.1.1/jars/classes.jar"
+        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/asm/asm/3.1/c157def142714c544bdea2e6144645702adf7097/asm-3.1.jar"
         jumboMode="false"
         revision="21.1.2"
-        sha1="e0b0c35d02308b270015a74cada4887e2e49b889">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-08b9dd05b14009053389954b4ad5b30311775371.jar" />
+        sha1="c157def142714c544bdea2e6144645702adf7097">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/asm-3.1-f5115b7846613545a37309defb33d71aca53b769.jar" />
     </item>
     <item
         jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/javax.inject/javax.inject/1/6975da39a7040257bd51d21a231b76c915872d38/javax.inject-1.jar"
@@ -107,11 +65,53 @@
         <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/javax.inject-1-7578b7ec840d06f04249a208a7b8c8ac07b0fd86.jar" />
     </item>
     <item
-        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/org.roboguice/roboguice/2.0/727ccb8f376109d0b5c44abca6f791dccc5c5dbc/roboguice-2.0.jar"
+        jar="/Users/wangfengchen/Chat/app/libs/asmack-jse-buddycloud-2010.12.11.jar"
         jumboMode="false"
         revision="21.1.2"
-        sha1="727ccb8f376109d0b5c44abca6f791dccc5c5dbc">
-        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/roboguice-2.0-2a8e8f48a7a38fcefb14a859a44103373058d087.jar" />
+        sha1="dcc95a6390689f2b03ca2f9b7df9f65ccfc24893">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/asmack-jse-buddycloud-2010.12.11-2cc6c0bd92bb321ec1714cb7b1c8731fb66382e1.jar" />
+    </item>
+    <item
+        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.malinskiy/superrecyclerview/1.1.0/jars/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="4649d32a5916687ff5d8e430aacb9a4e4eb10724">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-04e7ea4c9e26677b2efbfd69e88b4167b7e652e0.jar" />
+    </item>
+    <item
+        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.android.support/support-v4/22.1.1/jars/libs/internal_impl-22.1.1.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="9e070ad32b2700b0343e8e0cccc437733d91ba3a">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/internal_impl-22.1.1-31f64b0334db2be610bf6b2eecdcc1a56060a033.jar" />
+    </item>
+    <item
+        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/me.imid.swipebacklayout.lib/library/1.0.0/jars/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="6d0958dbac8e7be76690b8e85d91698dfadbd81e">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-3d431d7c2fa9a07377c375be81e68eb0ddc95547.jar" />
+    </item>
+    <item
+        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/org.sonatype.sisu.inject/cglib/2.2.1-v20090111/7ce5e983fd0e6c78346f4c9cbfa39d83049dda2/cglib-2.2.1-v20090111.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="07ce5e983fd0e6c78346f4c9cbfa39d83049dda2">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/cglib-2.2.1-v20090111-327a5254599bbcbbb3baec97523f35c3a8235cdc.jar" />
+    </item>
+    <item
+        jar="/Users/wangfengchen/.gradle/caches/modules-2/files-2.1/com.google.inject/guice/3.0/28586dc97c525501329d9a242fc3402041e3572d/guice-3.0-no_aop.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="28586dc97c525501329d9a242fc3402041e3572d">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/guice-3.0-no_aop-d6cbf2268b40b31e98953b74b0fbaa9fc5fbbf15.jar" />
+    </item>
+    <item
+        jar="/Users/wangfengchen/Chat/app/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/22.1.1/jars/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="e0b0c35d02308b270015a74cada4887e2e49b889">
+        <dex dex="/Users/wangfengchen/Chat/app/build/intermediates/pre-dexed/debug/classes-08b9dd05b14009053389954b4ad5b30311775371.jar" />
     </item>
 
 </items>

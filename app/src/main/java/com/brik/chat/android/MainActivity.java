@@ -32,7 +32,9 @@ import roboguice.activity.RoboFragmentActivity;
 public class MainActivity extends BaseActivity {
 
     @Inject
-    XMPPClient client;
+    private XMPPClient client;
+    @Inject
+    private SystemSettings settings;
 
     private IChatService mService;
 
@@ -59,6 +61,8 @@ public class MainActivity extends BaseActivity {
             return new ContactFragment();
         } else if(tag.equals("createmulti")){
             return new CreateMultiUserChatFragment();
+        } else if (tag.equals("login")) {
+            return new LoginFragment();
         }
         return null;
     }
@@ -93,24 +97,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onSuccess() {
                 Log.d("connect", "成功");
-                client.login("123456", "123456", new XMPPClient.LoginListener() {
-                    @Override
-                    public void onSuccess() {
-                        Log.d("login", "成功");
-
-                        startService();
-                        //绑定进程B的服务
-                        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
-                        intent.setPackage(getPackageName());
-                        bindService(intent, mConnection, BIND_AUTO_CREATE);
-                        currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
-                    }
-
-                    @Override
-                    public void onFail(Throwable t) {
-                        Log.e("login", "失败", t);
-                    }
-                });
+                login();
             }
 
             @Override
@@ -118,6 +105,36 @@ public class MainActivity extends BaseActivity {
                 Log.e("connect", "失败", t);
             }
         });
+    }
+
+    void login() {
+        String username = settings.getUsername();
+        String password = settings.getPassword();
+        if(username==null || password==null) {//去登陆
+            currentFragment = showFragments(R.id.content, "login", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+            return;
+        }
+        client.login("123456", "123456", new XMPPClient.LoginListener() {
+            @Override
+            public void onSuccess() {
+                Log.d("login", "成功");
+                loginSuccess();
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+                Log.e("login", "失败", t);
+            }
+        });
+    }
+
+    public void loginSuccess() {
+        startService();
+        //绑定进程B的服务
+        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
+        intent.setPackage(getPackageName());
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
+        currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
     }
 
     void startService() {
