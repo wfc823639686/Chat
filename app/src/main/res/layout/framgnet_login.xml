@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" android:background="@drawable/bg_color">
 
     <EditText
         android:layout_width="match_parent"
@@ -20,4 +20,13 @@
         android:layout_height="wrap_content"
         android:text="@string/submit"
         android:id="@+id/login_submit" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/go_to_resister"
+        android:id="@+id/login_go_to_resister"
+        android:background="@null"
+        android:layout_gravity="right" />
+
 </LinearLayout>

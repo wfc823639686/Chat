@@ -65,7 +65,7 @@ public abstract class BaseActivity extends RoboFragmentActivity implements View.
         return null;
     }
 
-    protected BaseFragment showFragments(int content, String tag, int enter, int exit, boolean needback){
+    public BaseFragment showFragments(int content, String tag, int enter, int exit, boolean needback){
         FragmentTransaction trans = fragmentManager.beginTransaction();
         if(enter!=0&&exit!=0) {
             trans.setCustomAnimations(enter, exit);

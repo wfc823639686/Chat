@@ -64,6 +64,8 @@ public class MainActivity extends BaseActivity {
             return new CreateMultiUserChatFragment();
         } else if (tag.equals("login")) {
             return new LoginFragment();
+        } else if(tag.equals("register")) {
+            return new RegisterFragment();
         }
         return null;
     }

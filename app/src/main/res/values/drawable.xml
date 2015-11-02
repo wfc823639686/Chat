@@ -150,4 +150,5 @@
 <drawable name="transparent">#00000000</drawable><!--透明 -->
 <drawable name="base_black">#00000000</drawable><!-- -->
 <drawable name="icz_green">#50af55</drawable><!-- icz green -->
+<drawable name="bg_color">#fff</drawable>
 </resources>

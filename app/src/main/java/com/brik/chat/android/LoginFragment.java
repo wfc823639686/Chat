@@ -32,6 +32,8 @@ public class LoginFragment extends BaseFragment {
     EditText passwordEdit;
     @InjectView(R.id.login_submit)
     Button submitBtn;
+    @InjectView(R.id.login_go_to_resister)
+    Button gotoRegisterBtn;
 
     private BaseActivity baseActivity;
 
@@ -51,6 +53,7 @@ public class LoginFragment extends BaseFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         submitBtn.setOnClickListener(this);
+        gotoRegisterBtn.setOnClickListener(this);
     }
 
     @Override
@@ -83,6 +86,14 @@ public class LoginFragment extends BaseFragment {
                         });
                     }
                 });
+                break;
+            case R.id.login_go_to_resister:
+                if(getActivity() instanceof MainActivity) {
+                    MainActivity mainActivity = (MainActivity) getActivity();
+                    mainActivity.currentFragment = baseActivity.
+                            showFragments(R.id.content, "register",
+                                    R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+                }
                 break;
         }
     }
