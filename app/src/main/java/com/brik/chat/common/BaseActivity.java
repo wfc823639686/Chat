@@ -85,16 +85,26 @@ public abstract class BaseActivity extends RoboFragmentActivity implements View.
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
-    public void pop(int v, boolean refresh) {
+    public void popFragment() {
+        backFragment(1, false);
+    }
+
+    public void backFragment(int back) {
+        backFragment(back, false);
+    }
+
+    public void backFragment(int back, boolean refresh) {
         int entryCount = fragmentManager.getBackStackEntryCount();
-        int i = entryCount - v;
-//        List<Fragment> fragmentList = fragmentManager.getFragments();
-//        if (fragmentList != null && !fragmentList.isEmpty() && i > 0) {
-//            Fragment f = fragmentList.get(i - 1);
-//            if (refresh && f instanceof PageFragment) {
-//                ((PageFragment) f).onRefresh();//刷新该page
-//            }
-//        }
+        int i = entryCount - back;
+        if(refresh) {
+            List<Fragment> fragmentList = fragmentManager.getFragments();
+            if (fragmentList != null && !fragmentList.isEmpty() && i > 0) {
+                Fragment f = fragmentList.get(i - 1);
+                if (f instanceof OnRefreshListener) {
+                    ((OnRefreshListener) f).onRefresh();//刷新该page
+                }
+            }
+        }
         if (i >= 0) {
             fragmentManager.popBackStack(i, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
