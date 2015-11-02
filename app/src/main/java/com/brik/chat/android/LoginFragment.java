@@ -101,8 +101,8 @@ public class LoginFragment extends BaseFragment {
     void loginSuccess() {
         if(getActivity() instanceof MainActivity) {
             MainActivity mainActivity = (MainActivity) getActivity();
-            mainActivity.loginSuccess();
             mainActivity.popFragment();
+            mainActivity.loginSuccess();
         }
     }
 }

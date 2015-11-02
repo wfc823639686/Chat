@@ -117,7 +117,7 @@ public class XMPPClient {
      * 用户注册
      * @param username 注册用户名
      * @param password 注册密码
-     * @return 1: 成功 0: 失败
+     * @return 1: 成功 0: 失败 -1: 用户名已被使用
      */
     public int register(String username, String password) {
         Registration reg = new Registration();
@@ -142,9 +142,9 @@ public class XMPPClient {
         } else if (result.getType() == IQ.Type.ERROR) {
             if (result.getError().toString().equalsIgnoreCase(
                     "conflict(409)")) {
-                return 0;
+                return -1;
             } else {
-               return -1;
+               return 0;
             }
         } else if (result.getType() == IQ.Type.RESULT) {
             return 1;

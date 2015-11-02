@@ -76,7 +76,10 @@ public class RegisterFragment extends BaseFragment {
                                         return;
                                     case 0:
                                         baseActivity.showToast("注册失败");
-                                        return;
+                                        break;
+                                    case -1:
+                                        baseActivity.showToast("该用户已存在");
+                                        break;
                                 }
                             }
                         });
