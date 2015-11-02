@@ -2,7 +2,9 @@ package com.brik.chat.service;
 
 import android.app.Notification;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -21,9 +23,13 @@ import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smackx.filetransfer.FileTransferListener;
+import org.jivesoftware.smackx.filetransfer.FileTransferRequest;
+import org.jivesoftware.smackx.filetransfer.IncomingFileTransfer;
 import org.jivesoftware.smackx.muc.HostedRoom;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -104,5 +110,32 @@ public class ChatService extends RoboService {
                 });
             }
         });
+    }
+
+    /**
+     * 文件接受监听器
+     *
+     */
+    static class ChatFileTransferListener implements FileTransferListener {
+        Context context;
+
+        public ChatFileTransferListener(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void fileTransferRequest(FileTransferRequest request) {
+            try {
+                File insFile = new File(
+                        Environment.getExternalStorageDirectory() + "/"
+                                + request.getFileName());
+                IncomingFileTransfer infiletransfer = request.accept();
+                infiletransfer.recieveFile(insFile);
+
+//                sendBroadcastFile(context, insFile.getAbsolutePath());
+            } catch (XMPPException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

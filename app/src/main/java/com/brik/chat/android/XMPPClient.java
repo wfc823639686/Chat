@@ -19,9 +19,14 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Registration;
 import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.GroupChatInvitation;
 import org.jivesoftware.smackx.PrivateDataManager;
+import org.jivesoftware.smackx.ReportedData;
 import org.jivesoftware.smackx.bytestreams.socks5.provider.BytestreamsProvider;
+import org.jivesoftware.smackx.filetransfer.FileTransfer;
+import org.jivesoftware.smackx.filetransfer.FileTransferManager;
+import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 import org.jivesoftware.smackx.packet.ChatStateExtension;
 import org.jivesoftware.smackx.packet.LastActivity;
 import org.jivesoftware.smackx.packet.OfflineMessageInfo;
@@ -42,8 +47,12 @@ import org.jivesoftware.smackx.provider.StreamInitiationProvider;
 import org.jivesoftware.smackx.provider.VCardProvider;
 import org.jivesoftware.smackx.provider.XHTMLExtensionProvider;
 import org.jivesoftware.smackx.search.UserSearch;
+import org.jivesoftware.smackx.search.UserSearchManager;
 
+import java.io.File;
 import java.lang.String;import java.lang.System;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -67,6 +76,17 @@ public class XMPPClient {
 
     public interface RegisterListener {
         void onComplete(int result);
+    }
+
+    public interface SearchUsersListener {
+        void onSuccess(ArrayList<String> result);
+        void onFail(Throwable t);
+    }
+
+    public interface SendTalkFileListener {
+        void onSuccess();
+        void onFail(Throwable t);
+        void onProgress(double s);
     }
 
     @Inject
@@ -191,6 +211,104 @@ public class XMPPClient {
             @Override
             public void run() {
                 listener.onComplete(getRoster());
+            }
+        });
+    }
+
+    /**
+     * 搜索用户
+     */
+    public ArrayList<String> searchUsers(String user) throws XMPPException {
+        ArrayList<String> users = new ArrayList<String>();
+        UserSearchManager usm = new UserSearchManager(xmppConnection);
+        Form searchForm = usm.getSearchForm("search."
+                    + xmppConnection.getServiceName());
+            Form answerForm = searchForm.createAnswerForm();
+            answerForm.setAnswer("Username", true);
+            answerForm.setAnswer("search", user);
+            ReportedData data = usm.getSearchResults(answerForm, "search."
+                    + xmppConnection.getServiceName());
+            // column:jid,Username,Name,Email
+            Iterator<ReportedData.Row> it = data.getRows();
+            ReportedData.Row row = null;
+            while (it.hasNext()) {
+                row = it.next();
+                // Log.d("UserName",
+                // row.getValues("Username").next().toString());
+                // Log.d("Name", row.getValues("Name").next().toString());
+                // Log.d("Email", row.getValues("Email").next().toString());
+                // 若存在，则有返回,UserName一定非空，其他两个若是有设，一定非空
+                users.add(row.getValues("Username").next().toString());
+            }
+        return users;
+    }
+
+    public void searchUsers(final String user, final SearchUsersListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ArrayList<String> result = searchUsers(user);
+                    listener.onSuccess(result);
+                } catch (XMPPException e) {
+                    listener.onFail(e);
+                }
+            }
+        });
+    }
+
+    /**
+     * 添加好友
+     *
+     * @param user
+     */
+    public void addFriend(String user) {
+        try {
+            // 添加好友
+            Roster roster = xmppConnection.getRoster();
+            roster.createEntry(user + "@snowyoung.org", null,
+                    new String[] { "friends" });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 发送文件
+     *
+     * @param to
+     * @param filepath
+     */
+    public OutgoingFileTransfer sendTalkFile(String to, String filepath, String des) throws XMPPException {
+        FileTransferManager fileTransferManager = new FileTransferManager(
+                xmppConnection);
+        OutgoingFileTransfer outgoingFileTransfer = fileTransferManager
+                .createOutgoingFileTransfer(to + "/Spark 2.6.3");
+        File insfile = new File(filepath);
+        outgoingFileTransfer.sendFile(insfile, des);
+        return outgoingFileTransfer;
+    }
+
+    public void sendTalkFile(final String to, final String filepath, final String des, final SendTalkFileListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    OutgoingFileTransfer transfer = sendTalkFile(to, filepath, des);
+                    while(!transfer.isDone()){
+                        if(transfer.getStatus().equals(FileTransfer.Status.error)){
+                            System.out.println("ERROR!!! " + transfer.getError());
+                            listener.onFail(new Exception(transfer.getError().getMessage()));
+                        }else{
+                            System.out.println(transfer.getStatus()+"进度 "+transfer.getProgress());
+                            listener.onProgress(transfer.getProgress());
+                        }
+                        Thread.sleep(1000);
+                    }
+                    listener.onSuccess();
+                } catch (XMPPException | InterruptedException e) {
+                    listener.onFail(e);
+                }
             }
         });
     }
