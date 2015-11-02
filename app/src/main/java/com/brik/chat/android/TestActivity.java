@@ -20,8 +20,8 @@ public class TestActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/a.png";
-        ImageLoader.getInstance().displayImage(filePath, (ImageView) findViewById(R.id.imageView));
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+        ImageLoader.getInstance().displayImage(filePath, (ImageView) findViewById(R.id.action_settings));
+        findViewById(R.id.action_settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 XMPPClient.getInstance().connect(new XMPPClient.ConnectListener() {

@@ -10,6 +10,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.brik.chat.android.IChatService;
+import com.brik.chat.android.SystemSettings;
 import com.brik.chat.android.XMPPClient;
 import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
@@ -61,10 +62,13 @@ public class ChatService extends RoboService {
     @Inject
     ExecutorService executor;
 
+    ChatFileTransferListener chatFileTransferListener;
+
     @Override
     public void onCreate() {
         super.onCreate();
         logger.warn("onCreate -----------------");
+        chatFileTransferListener = new ChatFileTransferListener(this);
         Notification notification = new Notification();
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
@@ -126,12 +130,19 @@ public class ChatService extends RoboService {
         @Override
         public void fileTransferRequest(FileTransferRequest request) {
             try {
+                String des = request.getDescription();
+                String pathStr = SystemSettings.CHAT_ROOT_DIR;
+                if(des.equals("yuyin")) {
+                    pathStr += "/yuyin/";
+                }
+                File path = new File(pathStr);
+                if(!path.exists())
+                    path.mkdirs();
                 File insFile = new File(
-                        Environment.getExternalStorageDirectory() + "/"
-                                + request.getFileName());
+                        pathStr + request.getFileName());
                 IncomingFileTransfer infiletransfer = request.accept();
                 infiletransfer.recieveFile(insFile);
-
+                Log.d("fileTransferRequest", "接收成功");
 //                sendBroadcastFile(context, insFile.getAbsolutePath());
             } catch (XMPPException e) {
                 e.printStackTrace();

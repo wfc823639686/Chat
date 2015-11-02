@@ -9,17 +9,21 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.brik.chat.common.BaseFragment;
 import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
+import com.brik.chat.view.RecordButton;
 import com.google.inject.Inject;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
@@ -31,6 +35,7 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +46,7 @@ import roboguice.inject.InjectView;
 /**
  * Created by wangfengchen on 15/6/26.
  */
-public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnRefreshListener{
+public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener{
 
     int p;
 
@@ -59,8 +64,16 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     private SuperRecyclerView mRecycler;
 
-    @InjectView(R.id.editText)
+    @InjectView(R.id.chat_input)
     private EditText editText;
+    @InjectView(R.id.chat_toggle_btn)
+    private Button toggleBtn;
+    @InjectView(R.id.chat_speak)
+    private RecordButton recordBtn;
+    @InjectView(R.id.chat_send_other)
+    private Button otherBtn;
+
+    private boolean showEdit = true;//输入框是否显示，默认是显示的
 
     @Inject
     private LayoutInflater layoutInflater;
@@ -73,7 +86,26 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
 
     private MessageDAO messageDAO;
 
-
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.chat_toggle_btn:
+                //切换功能按钮
+                if(showEdit) {
+                    recordBtn.setVisibility(View.VISIBLE);
+                    editText.setVisibility(View.GONE);
+                    showEdit = false;
+                } else {
+                    recordBtn.setVisibility(View.GONE);
+                    editText.setVisibility(View.VISIBLE);
+                    showEdit = true;
+                }
+                break;
+            case R.id.chat_send_other:
+                //发送其他
+                break;
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -141,10 +173,28 @@ public class ChatFragment extends RoboFragment implements SwipeRefreshLayout.OnR
         mRecycler.setAdapter(mAdapter);
     }
 
+    void initRecordButton() {
+        String pathStr = SystemSettings.CHAT_ROOT_DIR+ "/yuyin/";
+        File path = new File(pathStr);
+        if(!path.exists()) {
+            path.mkdirs();
+        }
+        recordBtn.setSavePath(pathStr);
+        recordBtn.setOnFinishedRecordListener(new RecordButton.OnFinishedRecordListener() {
+            @Override
+            public void onFinishedRecord(String audioPath) {
+                Log.d("onFinishedRecord", "audioPath: " + audioPath);
+            }
+        });
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        toggleBtn.setOnClickListener(this);
+        otherBtn.setOnClickListener(this);
         initSuperRecyclerView(view);
+        initRecordButton();
         initEditText();
         getMessageFromDB(0);
     }

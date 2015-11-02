@@ -20,15 +20,52 @@
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentBottom="true">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            style="@style/TextEdit"
-            android:id="@+id/editText"
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="yuyin"
+            android:id="@+id/chat_toggle_btn"
+            android:background="@null"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:padding="3dp"
+            android:id="@+id/toggle_layout">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                style="@style/TextEdit"
+                android:id="@+id/chat_input"
+                android:inputType="text"/>
+
+            <com.brik.chat.view.RecordButton
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="按住 说话"
+                android:id="@+id/chat_speak"
+                android:visibility="gone"/>
+        </FrameLayout>
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:text="other"
+            android:id="@+id/chat_send_other"
+            android:background="@null"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"/>
     </RelativeLayout>
+
+
 
 </RelativeLayout>
