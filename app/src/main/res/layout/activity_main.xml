@@ -15,6 +15,12 @@
             android:text="New Button"
             android:id="@+id/button"
             android:layout_gravity="left|top" />
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:id="@+id/imageView"
+            android:layout_gravity="center_horizontal|top" />
     </FrameLayout>
 
 </RelativeLayout>

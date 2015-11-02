@@ -285,6 +285,8 @@ public class XMPPClient {
         OutgoingFileTransfer outgoingFileTransfer = fileTransferManager
                 .createOutgoingFileTransfer(to + "/Spark 2.6.3");
         File insfile = new File(filepath);
+        Log.d("insfile is exists", ""+insfile.exists());
+        Log.d("insfile is canRead", ""+insfile.canRead());
         outgoingFileTransfer.sendFile(insfile, des);
         return outgoingFileTransfer;
     }
