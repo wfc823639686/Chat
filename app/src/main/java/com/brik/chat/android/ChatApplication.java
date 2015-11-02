@@ -15,7 +15,7 @@ public class ChatApplication extends Application {
     public void onCreate() {
         super.onCreate();
         RoboGuice. setBaseApplicationInjector(this, RoboGuice.DEFAULT_STAGE,
-                RoboGuice.newDefaultRoboModule(this), new ChatModule());
+                RoboGuice.newDefaultRoboModule(this), new ChatModule(this));
 
 
     }

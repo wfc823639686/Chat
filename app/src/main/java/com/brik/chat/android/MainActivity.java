@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.brik.chat.common.BaseActivity;
 import com.brik.chat.common.BaseFragment;
@@ -124,6 +125,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onFail(Throwable t) {
                 Log.e("login", "失败", t);
+                currentFragment = showFragments(R.id.content, "login", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
             }
         });
     }
@@ -147,6 +149,19 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
+    }
+
+    long exitTime;
+
+    @Override
+    public void finish() {
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
+        } else {
+            super.finish();
+            System.exit(0);
+        }
     }
 
     @Override

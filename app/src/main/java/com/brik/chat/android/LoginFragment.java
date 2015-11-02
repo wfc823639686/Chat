@@ -71,9 +71,16 @@ public class LoginFragment extends BaseFragment {
                     }
 
                     @Override
-                    public void onFail(Throwable t) {
+                    public void onFail(final Throwable t) {
                         Log.e("login", "登陆失败", t);
-                        baseActivity.showToast("登陆失败，请重试");
+                        submitBtn.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if ("SASL authentication failed using mechanism DIGEST-MD5".equals(t.getMessage())) {
+                                    baseActivity.showToast("登陆名或密码错误");
+                                }
+                            }
+                        });
                     }
                 });
                 break;

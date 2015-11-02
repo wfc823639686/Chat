@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -83,6 +84,17 @@ public abstract class BaseActivity extends RoboFragmentActivity implements View.
 
     public void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        int entryCount = fragmentManager.getBackStackEntryCount();
+        Log.d("onBackPressed", "entryCount " + entryCount);
+        if (entryCount > 1) {
+            fragmentManager.popBackStack();
+        } else {
+            finish();
+        }
     }
 
     public void popFragment() {
