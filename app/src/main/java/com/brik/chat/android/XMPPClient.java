@@ -65,6 +65,10 @@ public class XMPPClient {
         void onFail(Throwable t);
     }
 
+    public interface RegisterListener {
+        void onComplete(int result);
+    }
+
     @Inject
     ExecutorService executor;
 
@@ -99,12 +103,28 @@ public class XMPPClient {
         });
     }
 
-    public void register() {
+    public void register(final String username, final String password, final RegisterListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                int result = register(username, password);
+                listener.onComplete(result);
+            }
+        });
+    }
+
+    /**
+     * 用户注册
+     * @param username 注册用户名
+     * @param password 注册密码
+     * @return 1: 成功 0: 失败
+     */
+    public int register(String username, String password) {
         Registration reg = new Registration();
         reg.setType(IQ.Type.SET);
         reg.setTo(xmppConnection.getServiceName());
-        reg.setUsername("123456");
-        reg.setPassword("123456");
+        reg.setUsername(username);
+        reg.setPassword(password);
         reg.addAttribute("android", "geolo_createUser_android");
         System.out.println("reg:" + reg);
         PacketFilter filter = new AndFilter(new PacketIDFilter(reg
@@ -122,13 +142,14 @@ public class XMPPClient {
         } else if (result.getType() == IQ.Type.ERROR) {
             if (result.getError().toString().equalsIgnoreCase(
                     "conflict(409)")) {
-
+                return 0;
             } else {
-
+               return -1;
             }
         } else if (result.getType() == IQ.Type.RESULT) {
-
+            return 1;
         }
+        return 0;
     }
 
     public XMPPConnection getXMPPConnection() {
