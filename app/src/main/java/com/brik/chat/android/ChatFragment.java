@@ -60,7 +60,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     int userType;
 
-    XMPPClient client = XMPPClient.getInstance();
+    @Inject
+    XMPPClient client;
 
     private SuperRecyclerView mRecycler;
 
@@ -83,7 +84,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     private Context mContext;
 
     private IChatService mService;
-
+    @Inject
     private MessageDAO messageDAO;
 
     @Override
@@ -144,8 +145,6 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         if(activity instanceof ChatActivity) {
             mService = ((ChatActivity)activity).getIChatService();
         }
-        messageDAO = new MessageDAO(getActivity());
-
     }
 
     void getMessageFromDB(int p) {
@@ -184,6 +183,22 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             @Override
             public void onFinishedRecord(String audioPath) {
                 Log.d("onFinishedRecord", "audioPath: " + audioPath);
+                client.sendTalkFile(user, audioPath, "yuyin", new XMPPClient.SendTalkFileListener() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onFail(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onProgress(double s) {
+
+                    }
+                });
             }
         });
     }

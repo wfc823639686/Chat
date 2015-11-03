@@ -2,6 +2,9 @@ package com.brik.chat.android;
 
 import android.util.Log;
 
+import com.brik.chat.db.MessageDAO;
+import com.brik.chat.entry.Contact;
+import com.brik.chat.entry.IMessage;
 import com.google.inject.Inject;
 
 import org.jivesoftware.smack.ChatManager;
@@ -16,11 +19,14 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Registration;
 import org.jivesoftware.smack.provider.PrivacyProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.GroupChatInvitation;
+import org.jivesoftware.smackx.OfflineMessageManager;
 import org.jivesoftware.smackx.PrivateDataManager;
 import org.jivesoftware.smackx.ReportedData;
 import org.jivesoftware.smackx.bytestreams.socks5.provider.BytestreamsProvider;
@@ -52,7 +58,10 @@ import org.jivesoftware.smackx.search.UserSearchManager;
 import java.io.File;
 import java.lang.String;import java.lang.System;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -79,7 +88,7 @@ public class XMPPClient {
     }
 
     public interface SearchUsersListener {
-        void onSuccess(ArrayList<String> result);
+        void onSuccess(ArrayList<Contact> result);
         void onFail(Throwable t);
     }
 
@@ -89,8 +98,21 @@ public class XMPPClient {
         void onProgress(double s);
     }
 
+    public interface AddFriendListener {
+        void onSuccess();
+        void onFail(Throwable t);
+    }
+
+    public interface GetOfflineMessageListener {
+        void onSuccess();
+        void onFail(Throwable t);
+        void onComplete();
+    }
+
     @Inject
     ExecutorService executor;
+    @Inject
+    MessageDAO messageDAO;
 
     private XMPPConnection xmppConnection;
 
@@ -104,6 +126,7 @@ public class XMPPClient {
         XMPPConnection.DEBUG_ENABLED = true;
         final ConnectionConfiguration connectionConfig = new ConnectionConfiguration(
                 "snowyoung.org", 5222, "snowyoung.org");
+        connectionConfig.setSendPresence(false);
         xmppConnection = new XMPPConnection(connectionConfig);
         xmppConnection.connect();
         configure(ProviderManager.getInstance());
@@ -121,6 +144,63 @@ public class XMPPClient {
                 }
             }
         });
+    }
+
+    public void getOfflineMessage() throws XMPPException {
+        OfflineMessageManager offlineManager = new OfflineMessageManager(
+                xmppConnection);
+            Iterator<org.jivesoftware.smack.packet.Message> it = offlineManager
+                    .getMessages();
+
+            Log.d("getOfflineMessage", ""+offlineManager.supportsFlexibleRetrieval());
+            Log.d("getOfflineMessage", "离线消息数量: " + offlineManager.getMessageCount());
+
+
+            Map<String,ArrayList<Message>> offlineMsgs = new HashMap<String,ArrayList<Message>>();
+
+            while (it.hasNext()) {
+                org.jivesoftware.smack.packet.Message message = it.next();
+                Log.d("getOfflineMessage", "收到离线消息, Received from 【" + message.getFrom()
+                        + "】 message: " + message.getBody());
+                IMessage iMessage = new IMessage();
+                iMessage.setMessage(message);
+                messageDAO.add(iMessage);
+//                String fromUser = message.getFrom().split("/")[0];
+//
+//                if(offlineMsgs.containsKey(fromUser))
+//                {
+//                    offlineMsgs.get(fromUser).add(message);
+//                }else{
+//                    ArrayList<Message> temp = new ArrayList<Message>();
+//                    temp.add(message);
+//                    offlineMsgs.put(fromUser, temp);
+//                }
+            }
+        offlineManager.deleteMessages();
+    }
+
+    void getOfflineMessage(final GetOfflineMessageListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getOfflineMessage();
+                    listener.onSuccess();
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                    listener.onFail(e);
+                }
+                listener.onComplete();
+            }
+        });
+    }
+
+    /**
+     * 上线
+     */
+    void available() {
+        Presence presence = new Presence(Presence.Type.available);
+        xmppConnection.sendPacket(presence);
     }
 
     public void register(final String username, final String password, final RegisterListener listener) {
@@ -218,8 +298,8 @@ public class XMPPClient {
     /**
      * 搜索用户
      */
-    public ArrayList<String> searchUsers(String user) throws XMPPException {
-        ArrayList<String> users = new ArrayList<String>();
+    public ArrayList<Contact> searchUsers(String user) throws XMPPException {
+        ArrayList<Contact> users = new ArrayList<Contact>();
         UserSearchManager usm = new UserSearchManager(xmppConnection);
         Form searchForm = usm.getSearchForm("search."
                     + xmppConnection.getServiceName());
@@ -233,12 +313,16 @@ public class XMPPClient {
             ReportedData.Row row = null;
             while (it.hasNext()) {
                 row = it.next();
+                Contact item = new Contact();
+                item.setName(row.getValues("Name").next().toString());
+                item.setUser(row.getValues("Username").next().toString());
+                item.setJid(row.getValues("jid").next().toString());
                 // Log.d("UserName",
                 // row.getValues("Username").next().toString());
                 // Log.d("Name", row.getValues("Name").next().toString());
                 // Log.d("Email", row.getValues("Email").next().toString());
                 // 若存在，则有返回,UserName一定非空，其他两个若是有设，一定非空
-                users.add(row.getValues("Username").next().toString());
+                users.add(item);
             }
         return users;
     }
@@ -248,7 +332,7 @@ public class XMPPClient {
             @Override
             public void run() {
                 try {
-                    ArrayList<String> result = searchUsers(user);
+                    ArrayList<Contact> result = searchUsers(user);
                     listener.onSuccess(result);
                 } catch (XMPPException e) {
                     listener.onFail(e);
@@ -262,15 +346,22 @@ public class XMPPClient {
      *
      * @param user
      */
-    public void addFriend(String user) {
-        try {
-            // 添加好友
-            Roster roster = xmppConnection.getRoster();
-            roster.createEntry(user + "@snowyoung.org", null,
-                    new String[] { "friends" });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void addFriend(final String user, final AddFriendListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 添加好友
+                    Roster roster = xmppConnection.getRoster();
+                    roster.createEntry(user + "@snowyoung.org", null,
+                            new String[] { "friends" });
+                    listener.onSuccess();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    listener.onFail(e);
+                }
+            }
+        });
     }
 
     /**

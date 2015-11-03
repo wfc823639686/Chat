@@ -46,6 +46,7 @@ public class ChatService extends RoboService {
 
     Logger logger = LoggerFactory.getLogger(ChatService.class);
 
+    @Inject
     MessageDAO messageDAO;
     @Inject
     XMPPClient client;
@@ -72,7 +73,6 @@ public class ChatService extends RoboService {
         Notification notification = new Notification();
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
-        messageDAO = new MessageDAO(this);
         rec();
     }
 

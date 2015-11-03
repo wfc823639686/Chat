@@ -66,6 +66,8 @@ public class MainActivity extends BaseActivity {
             return new LoginFragment();
         } else if(tag.equals("register")) {
             return new RegisterFragment();
+        } else if(tag.equals("search")) {
+            return new SearchFragment();
         }
         return null;
     }
@@ -133,12 +135,32 @@ public class MainActivity extends BaseActivity {
     }
 
     public void loginSuccess() {
-        startService();
-        //绑定进程B的服务
-        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
-        intent.setPackage(getPackageName());
-        bindService(intent, mConnection, BIND_AUTO_CREATE);
-        currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+        //获取离线数据
+        client.getOfflineMessage(new XMPPClient.GetOfflineMessageListener() {
+            @Override
+            public void onSuccess() {
+                Log.d("getOfflineMessage", "onSuccess");
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+                Log.d("getOfflineMessage", "onFail");
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d("getOfflineMessage", "onComplete");
+                //上线
+                client.available();
+                startService();
+                //绑定进程B的服务
+                Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
+                intent.setPackage(getPackageName());
+                bindService(intent, mConnection, BIND_AUTO_CREATE);
+                currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+            }
+        });
+
     }
 
     void startService() {
@@ -174,7 +196,7 @@ public class MainActivity extends BaseActivity {
 //                    OnOptionClickListener listener = (OnOptionClickListener) currentFragment;
 //                    listener.onOptionClick(view);
 //                }
-            currentFragment = showFragments(R.id.content, "createmulti", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
+            currentFragment = showFragments(R.id.content, "search", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
             break;
         }
     }
