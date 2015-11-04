@@ -28,6 +28,7 @@ import com.brik.chat.view.RecordButton;
 import com.google.inject.Inject;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.PacketListener;
@@ -36,6 +37,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -292,10 +294,21 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     };
 
-    class MyViewHolder extends RecyclerView.ViewHolder {
+    class BaseViewHolder extends RecyclerView.ViewHolder {
+        protected TextView textView;
+        protected ImageView headView;
+        protected ImageView audioView;
+        public BaseViewHolder(View itemView) {
+            super(itemView);
+        }
 
-        TextView textView;
-        ImageView headView;
+
+
+    }
+
+    class MyViewHolder extends BaseViewHolder {
+
+
 
         public MyViewHolder(View itemView) {
             super(itemView);
@@ -305,7 +318,15 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
         void bindView(IMessage mw) {
             Message m = mw.getMessage();
-            textView.setText(m.getBody());
+            String cType = (String) m.getProperty("c-type");
+            if(cType!=null) {
+                if(cType.equals("audio")) {
+                    //是语音
+
+                }
+            } else {
+                textView.setText(m.getBody());
+            }
             XMPPError error = m.getError();
             if(error!=null) {
                 if(error.getCode()==-1) {
@@ -315,7 +336,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         }
     }
 
-    class OtherViewHolder extends RecyclerView.ViewHolder {
+    class OtherViewHolder extends BaseViewHolder {
 
         TextView textView;
         ImageView headView;
@@ -328,7 +349,15 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
         void bindView(IMessage mw) {
             Message m = mw.getMessage();
-            textView.setText(m.getBody());
+            String cType = (String) m.getProperty("c-type");
+            if(cType!=null) {
+                if(cType.equals("audio")) {
+                    //是语音
+
+                }
+            } else {
+                textView.setText(m.getBody());
+            }
         }
     }
 
@@ -369,7 +398,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 Log.d("uploadAudio", "onSuccess result " + response);
                 String audioUrl = response.optString("url");
                 Message m = new Message();
-                m.setType(Message.Type.headline);
+                m.setProperty("c-type", "audio");//自定义type
                 m.setBody(audioUrl);
                 try {
                     ChatFragment.this.sendMessage(m);
@@ -383,6 +412,12 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 super.onFailure(e, errorResponse);
                 Log.d("uploadAudio", "onFailure result " + e + ",errorResponse " + errorResponse);
                 //TODO 上传出错，重试
+            }
+
+            @Override
+            public void onFinish() {
+                super.onFinish();
+                Log.d("uploadAudio", "onFinish");
             }
         });
 

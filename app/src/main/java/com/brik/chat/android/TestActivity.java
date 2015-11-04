@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.brik.chat.view.PlayAudioButton;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 /**
@@ -18,7 +19,17 @@ public class TestActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_test);
+        testPlayAudio();
+    }
+
+    void testPlayAudio() {
+        PlayAudioButton button = (PlayAudioButton) findViewById(R.id.view);
+        final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/b.mp3";
+        button.setAudioFilePath(filePath);
+    }
+
+    void testSendFile() {
         final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/a.png";
         ImageLoader.getInstance().displayImage(filePath, (ImageView) findViewById(R.id.action_settings));
         findViewById(R.id.action_settings).setOnClickListener(new View.OnClickListener() {

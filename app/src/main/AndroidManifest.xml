@@ -15,7 +15,7 @@
         android:screenOrientation="landscape"
         android:configChanges="orientation">
         <activity
-            android:name=".MainActivity"
+            android:name=".TestActivity"
             android:theme="@style/ActionBarTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
