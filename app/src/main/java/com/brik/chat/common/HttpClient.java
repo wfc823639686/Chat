@@ -61,7 +61,7 @@ public class HttpClient {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        params.add("uid", "audios");
+        params.add("uid", "-100");
         client.post(url, params, handler);
     }
 

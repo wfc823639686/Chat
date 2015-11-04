@@ -6,6 +6,8 @@ import com.j256.ormlite.table.DatabaseTable;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.packet.Message;
 
+import java.util.Map;
+
 /**
  * Created by wangfengchen on 15/7/8.
  */
@@ -22,6 +24,10 @@ public class IMessage {
     private String from;
     @DatabaseField
     private String to;
+    private String customType;
+    private String fileUrl;
+    private String filePath;
+    private Integer fileSize;
 
     public int getId() {
         return id;
@@ -63,6 +69,38 @@ public class IMessage {
         this.to = to;
     }
 
+    public String getCustomType() {
+        return customType;
+    }
+
+    public void setCustomType(String customType) {
+        this.customType = customType;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public Integer getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(Integer fileSize) {
+        this.fileSize = fileSize;
+    }
+
     public IMessage(){}
 
     public IMessage(Message message) {
@@ -74,6 +112,10 @@ public class IMessage {
         setFrom(message.getFrom());
         setType(message.getType().name());
         setTo(message.getTo());
+        setCustomType((String) message.getProperty("c-type"));
+        setFileUrl((String) message.getProperty("file-url"));
+        setFilePath((String) message.getProperty("file-path"));
+        setFileSize((Integer) message.getProperty("file-size"));
     }
 
     public Message getMessage() {
@@ -82,6 +124,10 @@ public class IMessage {
         message.setFrom(getFrom());
         message.setTo(getTo());
         message.setType(Message.Type.fromString(getType()));
+        message.setProperty("c-type", getCustomType());
+        message.setProperty("file-url", getFileUrl());
+        message.setProperty("file-path", getFilePath());
+        message.setProperty("file-size", getFileSize());
         return message;
     }
 

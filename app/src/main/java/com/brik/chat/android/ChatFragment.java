@@ -204,7 +204,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         initSuperRecyclerView(view);
         initRecordButton();
         initEditText();
-        getMessageFromDB(0);
+//        getMessageFromDB(0);
     }
 
     void initEditText() {
@@ -299,11 +299,13 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         protected TextView textView;
         protected ImageView headView;
         protected PlayAudioButton playAudioButton;
-        protected ViewGroup playAudioLayout;
+        protected View playAudioLayout;
         public BaseViewHolder(View itemView) {
             super(itemView);
             textView = (TextView) itemView.findViewById(R.id.item_text);
             headView = (ImageView) itemView.findViewById(R.id.item_head);
+            playAudioLayout = itemView.findViewById(R.id.item_play_audio_layout);
+            playAudioButton = (PlayAudioButton) itemView.findViewById(R.id.item_play_audio_btn);
         }
 
         void showText() {
@@ -342,9 +344,9 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 if(cType.equals("audio")) {
                     //是语音
                     showPlayAudioLayout();
-                    String audioPath = (String) m.getProperty("audio-path");
+                    String audioPath = (String) m.getProperty("file-path");
 //                    String audioUrl = (String) m.getProperty("audio-url");
-                    Integer audioSize = (Integer) m.getProperty("audio-size");
+                    Integer audioSize = (Integer) m.getProperty("file-size");
                     initPlayAudioBtn(audioPath, audioSize);
                 }
             } else {
@@ -418,9 +420,9 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 String audioUrl = response.optString("url");
                 Message m = new Message();
                 m.setProperty("c-type", "audio");//自定义type
-                m.setProperty("audio-size", new File(filePath).length());//文件大小
-                m.setProperty("audio-url", audioUrl);
-                m.setProperty("audio-path", filePath);
+                m.setProperty("file-size", new File(filePath).length());//文件大小
+                m.setProperty("file-url", audioUrl);
+                m.setProperty("file-path", filePath);
                 try {
                     ChatFragment.this.sendMessage(m);
                 } catch (XMPPException e) {
