@@ -152,7 +152,7 @@ public class XMPPClient {
             Iterator<org.jivesoftware.smack.packet.Message> it = offlineManager
                     .getMessages();
 
-            Log.d("getOfflineMessage", ""+offlineManager.supportsFlexibleRetrieval());
+//            Log.d("getOfflineMessage", ""+offlineManager.supportsFlexibleRetrieval());
             Log.d("getOfflineMessage", "离线消息数量: " + offlineManager.getMessageCount());
 
 

@@ -23,6 +23,7 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:support-v4:22.1.1'
     compile 'com.android.support:recyclerview-v7:22.1.1'
+    compile 'com.loopj.android:android-async-http:1.4.4'
     compile group: 'org.roboguice', name: 'roboguice', version: '2.0'
     compile group: 'com.j256.ormlite', name: 'ormlite-android', version: '4.48'
     compile group: 'com.nostra13.universalimageloader', name: 'universal-image-loader', version: '1.9.2'

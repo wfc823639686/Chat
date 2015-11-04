@@ -12,6 +12,7 @@ import java.util.Set;
 
 public class SystemSettings {
 
+    public static final String SERVICE_HOST = "http://mp.ichezhen.com";
     private static SystemSettings instance;
 
     public static final String SDCARD_PATH = Environment

@@ -21,10 +21,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.brik.chat.common.BaseFragment;
+import com.brik.chat.common.HttpClient;
 import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
 import com.brik.chat.view.RecordButton;
 import com.google.inject.Inject;
+import com.loopj.android.http.JsonHttpResponseHandler;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.Chat;
@@ -34,6 +36,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -62,6 +65,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     @Inject
     XMPPClient client;
+    @Inject
+    HttpClient httpClient;
 
     private SuperRecyclerView mRecycler;
 
@@ -183,22 +188,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             @Override
             public void onFinishedRecord(String audioPath) {
                 Log.d("onFinishedRecord", "audioPath: " + audioPath);
-                client.sendTalkFile(user, audioPath, "yuyin", new XMPPClient.SendTalkFileListener() {
-                    @Override
-                    public void onSuccess() {
-
-                    }
-
-                    @Override
-                    public void onFail(Throwable t) {
-
-                    }
-
-                    @Override
-                    public void onProgress(double s) {
-
-                    }
-                });
+                sendAudio(audioPath);
             }
         });
     }
@@ -224,7 +214,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
                     String text = editText.getText().toString();
                     if(!text.equals("")) {
-                        sendMessage(text);
+                        sendText(text);
                         editText.setText("");
                     }
                     return true;
@@ -371,39 +361,70 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         });
     }
 
-    public void sendMessage(String message) {
+    public void sendAudio(final String filePath) {
+        httpClient.uploadAudio(filePath, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(JSONObject response) {
+                super.onSuccess(response);
+                Log.d("uploadAudio", "onSuccess result " + response);
+                String audioUrl = response.optString("url");
+                Message m = new Message();
+                m.setType(Message.Type.headline);
+                m.setBody(audioUrl);
+                try {
+                    ChatFragment.this.sendMessage(m);
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable e, JSONObject errorResponse) {
+                super.onFailure(e, errorResponse);
+                Log.d("uploadAudio", "onFailure result " + e + ",errorResponse " + errorResponse);
+                //TODO 上传出错，重试
+            }
+        });
+
+    }
+
+    public void sendMessage(Message m) throws XMPPException {
+        IMessage mw = null;
+        switch (userType) {
+            case 1://user
+                if(chat!=null) {
+                    chat.sendMessage(m);
+                    mw = new IMessage(m);
+                    messageDAO.add(mw);
+                }else {//如果为空，则重试
+                    m.setError(new XMPPError(-1));//发送失败，请重试
+                }
+                break;
+            case 2://room
+                if(muc!=null) {
+                    m.setTo(muc.getRoom());
+                    m.setType(Message.Type.groupchat);
+                    m.setFrom(XMPPClient.getInstance().getUser());
+                    muc.sendMessage(m);
+                    mw = new IMessage(m);
+                    messageDAO.add(mw);
+                }else {//如果为空，则重试
+                    m.setError(new XMPPError(-1));//发送失败，请重试
+                }
+                break;
+        }
+        if(mw!=null) {
+            mAdapter.add(mw);
+            int count = mAdapter.getItemCount();
+            mRecycler.getRecyclerView().scrollToPosition(count==0?0:count-1);
+        }
+    }
+
+    public void sendText(String message) {
         try {
             Message m = new Message();
             m.setBody(message);
-            IMessage mw = null;
-            switch (userType) {
-                case 1://user
-                    if(chat!=null) {
-                        chat.sendMessage(m);
-                        mw = new IMessage(m);
-                        messageDAO.add(mw);
-                    }else {//如果为空，则重试
-                        m.setError(new XMPPError(-1));//发送失败，请重试
-                    }
-                    break;
-                case 2://room
-                    if(muc!=null) {
-                        m.setTo(muc.getRoom());
-                        m.setType(Message.Type.groupchat);
-                        m.setFrom(XMPPClient.getInstance().getUser());
-                        muc.sendMessage(m);
-                        mw = new IMessage(m);
-                        messageDAO.add(mw);
-                    }else {//如果为空，则重试
-                        m.setError(new XMPPError(-1));//发送失败，请重试
-                    }
-                    break;
-            }
-            if(mw!=null) {
-                mAdapter.add(mw);
-                int count = mAdapter.getItemCount();
-                mRecycler.getRecyclerView().scrollToPosition(count==0?0:count-1);
-            }
+            sendMessage(m);
         } catch (XMPPException e) {
             e.printStackTrace();
         }

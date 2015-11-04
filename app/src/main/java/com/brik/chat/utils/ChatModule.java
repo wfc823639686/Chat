@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.brik.chat.android.SystemSettings;
 import com.brik.chat.android.XMPPClient;
+import com.brik.chat.common.HttpClient;
 import com.brik.chat.db.MessageDAO;
 import com.google.inject.AbstractModule;
 import com.google.inject.Binder;
@@ -27,6 +28,7 @@ public class ChatModule extends AbstractModule {
     protected void configure() {
         bind(ExecutorService.class).toInstance(Executors.newCachedThreadPool());
         bind(XMPPClient.class).toInstance(XMPPClient.getInstance());
+        bind(HttpClient.class).toInstance(HttpClient.getInstance());
         bind(SystemSettings.class).toInstance(SystemSettings.getInstance(context));
         bind(MessageDAO.class).toInstance(new MessageDAO(context));
     }
