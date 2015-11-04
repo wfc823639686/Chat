@@ -6,26 +6,44 @@
 
     <ImageView
         style="@style/Message.Head"
-        android:id="@+id/item_my_head"
+        android:id="@+id/item_head"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
     <RelativeLayout
-        android:id="@+id/item_my_content"
+        android:id="@+id/item_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:layout_alignTop="@+id/item_my_head"
-        android:layout_toLeftOf="@+id/item_my_head"
-        android:layout_toStartOf="@+id/item_my_head">
+        android:layout_alignTop="@+id/item_head"
+        android:layout_toLeftOf="@+id/item_head"
+        android:layout_toStartOf="@+id/item_head">
         <TextView
             style="@style/Message.Text"
-            android:id="@+id/item_my_text"
+            android:id="@+id/item_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"/>
+
+        <RelativeLayout
+            android:id="@+id/item_play_audio_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true">
+
+            <view
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                class="com.brik.chat.view.PlayAudioButton"
+                android:id="@+id/item_play_audio_btn"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+        </RelativeLayout>
     </RelativeLayout>
 </RelativeLayout>

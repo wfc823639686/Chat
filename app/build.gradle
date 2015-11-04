@@ -29,5 +29,6 @@ dependencies {
     compile group: 'com.nostra13.universalimageloader', name: 'universal-image-loader', version: '1.9.2'
     compile 'com.malinskiy:superrecyclerview:1.1.0'
     compile files('libs/asmack-jse-buddycloud-2010.12.11.jar')
+    compile files('libs/commons-io-2.4.jar')
     compile 'me.imid.swipebacklayout.lib:library:1.0.0'
 }

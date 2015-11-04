@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.brik.chat.android.R;
@@ -80,5 +81,11 @@ public class PlayAudioButton extends Button {
     }
 
     private String mFileName = null;
+
+    public void setPlayButtonWidth(int w) {
+        ViewGroup.LayoutParams lp = getLayoutParams();
+        lp.width = w;
+        setLayoutParams(lp);
+    }
 
 }

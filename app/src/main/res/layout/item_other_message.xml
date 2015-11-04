@@ -6,22 +6,22 @@
 
     <ImageView
         style="@style/Message.Head"
-        android:id="@+id/item_other_head"
+        android:id="@+id/item_head"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <RelativeLayout
-        android:id="@+id/item_other_content"
+        android:id="@+id/item_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:layout_alignTop="@+id/item_other_head"
-        android:layout_toRightOf="@+id/item_other_head"
-        android:layout_toEndOf="@+id/item_other_head">
+        android:layout_alignTop="@+id/item_head"
+        android:layout_toRightOf="@+id/item_head"
+        android:layout_toEndOf="@+id/item_head">
         <TextView
             style="@style/Message.Text"
-            android:id="@+id/item_other_text"
+            android:id="@+id/item_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"

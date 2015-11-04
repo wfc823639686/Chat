@@ -24,6 +24,7 @@ import com.brik.chat.common.BaseFragment;
 import com.brik.chat.common.HttpClient;
 import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
+import com.brik.chat.view.PlayAudioButton;
 import com.brik.chat.view.RecordButton;
 import com.google.inject.Inject;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -297,23 +298,41 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     class BaseViewHolder extends RecyclerView.ViewHolder {
         protected TextView textView;
         protected ImageView headView;
-        protected ImageView audioView;
+        protected PlayAudioButton playAudioButton;
+        protected ViewGroup playAudioLayout;
         public BaseViewHolder(View itemView) {
             super(itemView);
+            textView = (TextView) itemView.findViewById(R.id.item_text);
+            headView = (ImageView) itemView.findViewById(R.id.item_head);
         }
 
+        void showText() {
+            textView.setVisibility(View.VISIBLE);
+            playAudioLayout.setVisibility(View.GONE);
+        }
 
+        void showPlayAudioLayout() {
+            textView.setVisibility(View.GONE);
+            playAudioLayout.setVisibility(View.VISIBLE);
+        }
 
+        void initPlayAudioBtn(String path, int w) {
+            playAudioButton.setAudioFilePath(path);
+            //设置最大／小宽度
+            if(w<100) {
+                w = 100;
+            }
+            if(w>200) {
+                w = 200;
+            }
+            playAudioButton.setPlayButtonWidth(w);
+        }
     }
 
     class MyViewHolder extends BaseViewHolder {
 
-
-
         public MyViewHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.item_my_text);
-            headView = (ImageView) itemView.findViewById(R.id.item_my_head);
         }
 
         void bindView(IMessage mw) {
@@ -322,9 +341,11 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             if(cType!=null) {
                 if(cType.equals("audio")) {
                     //是语音
-
+                    showPlayAudioLayout();
+//                    initPlayAudioBtn();
                 }
             } else {
+                showText();
                 textView.setText(m.getBody());
             }
             XMPPError error = m.getError();
@@ -338,13 +359,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     class OtherViewHolder extends BaseViewHolder {
 
-        TextView textView;
-        ImageView headView;
-
         public OtherViewHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.item_other_text);
-            headView = (ImageView) itemView.findViewById(R.id.item_other_head);
         }
 
         void bindView(IMessage mw) {
@@ -399,6 +415,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 String audioUrl = response.optString("url");
                 Message m = new Message();
                 m.setProperty("c-type", "audio");//自定义type
+                m.setProperty("audio-size", new File(filePath).length());//文件大小
                 m.setBody(audioUrl);
                 try {
                     ChatFragment.this.sendMessage(m);
