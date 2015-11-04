@@ -1,12 +1,19 @@
 package com.brik.chat.android;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.brik.chat.service.ChatService;
+import com.brik.chat.utils.MapUtils;
 import com.brik.chat.view.PlayAudioButton;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
@@ -15,12 +22,63 @@ import com.nostra13.universalimageloader.core.ImageLoader;
  */
 public class TestActivity extends Activity {
 
+    IChatService mService;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = IChatService.Stub.asInterface(service);
+            testFileTransfer();
+        }
+
+        @Override public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
+    void startChatService() {
+        Intent intent = new Intent(this, ChatService.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(intent);
+    }
+
+    void stopChatService() {
+        Intent intent = new Intent(this, ChatService.class);
+        stopService(intent);
+    }
+
+    void bindChatService() {
+        //绑定进程B的服务
+        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
+        intent.setPackage(getPackageName());
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        testPlayAudio();
+        bindChatService();
+//        testPlayAudio();
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
+    }
+
+    void testFileTransfer() {
+        final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/c.png";
+        try {
+            mService.addFileTransfer(
+                    MapUtils.create(
+                            "fileurl", "https://www.baidu.com/img/bdlogo.png",
+                            "filepath", filePath));
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     void testPlayAudio() {

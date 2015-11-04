@@ -152,21 +152,25 @@ public class MainActivity extends BaseActivity {
                 Log.d("getOfflineMessage", "onComplete");
                 //上线
                 client.available();
-                startService();
-                //绑定进程B的服务
-                Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
-                intent.setPackage(getPackageName());
-                bindService(intent, mConnection, BIND_AUTO_CREATE);
+                startChatService();
+                bindChatService();
                 currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
             }
         });
 
     }
 
-    void startService() {
+    void startChatService() {
         Intent intent = new Intent(this, ChatService.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startService(intent);
+    }
+
+    void bindChatService() {
+        //绑定进程B的服务
+        Intent intent = new Intent(Constants.CHAT_SERVICE_ACTION);
+        intent.setPackage(getPackageName());
+        bindService(intent, mConnection, BIND_AUTO_CREATE);
     }
 
     @Override

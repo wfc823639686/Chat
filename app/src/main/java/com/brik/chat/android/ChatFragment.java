@@ -342,7 +342,10 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 if(cType.equals("audio")) {
                     //是语音
                     showPlayAudioLayout();
-//                    initPlayAudioBtn();
+                    String audioPath = (String) m.getProperty("audio-path");
+//                    String audioUrl = (String) m.getProperty("audio-url");
+                    Integer audioSize = (Integer) m.getProperty("audio-size");
+                    initPlayAudioBtn(audioPath, audioSize);
                 }
             } else {
                 showText();
@@ -416,7 +419,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 Message m = new Message();
                 m.setProperty("c-type", "audio");//自定义type
                 m.setProperty("audio-size", new File(filePath).length());//文件大小
-                m.setBody(audioUrl);
+                m.setProperty("audio-url", audioUrl);
+                m.setProperty("audio-path", filePath);
                 try {
                     ChatFragment.this.sendMessage(m);
                 } catch (XMPPException e) {

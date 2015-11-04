@@ -3,9 +3,12 @@ package com.brik.chat.service;
 import android.app.Notification;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import com.brik.chat.android.IChatService;
 import com.brik.chat.android.XMPPClient;
+import com.brik.chat.common.ChatFileTransferListener;
+import com.brik.chat.common.HttpClient;
 import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
 import com.google.inject.Inject;
@@ -15,6 +18,8 @@ import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
+
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import roboguice.service.RoboService;
 
@@ -32,6 +37,14 @@ public class ChatService extends RoboService {
 
     private IChatService.Stub mService = new IChatService.Stub() {
 
+        @Override
+        public void addFileTransfer(Map m) throws RemoteException {
+            try {
+                chatFileTransferListener.put(m);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     };
 
     @Override
@@ -41,15 +54,26 @@ public class ChatService extends RoboService {
 
     @Inject
     ExecutorService executor;
+    @Inject
+    HttpClient httpClient;
+
+    ChatFileTransferListener chatFileTransferListener;
 
     @Override
     public void onCreate() {
         super.onCreate();
         logger.warn("onCreate -----------------");
+        chatFileTransferListener = new ChatFileTransferListener(this, httpClient);
         Notification notification = new Notification();
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
-        rec();
+//        rec();
+        startFileTransTask();
+    }
+
+    void startFileTransTask() {
+        Log.d("chatFileTransfer", "startFileTransTask");
+        executor.execute(chatFileTransferListener);
     }
 
     @Override

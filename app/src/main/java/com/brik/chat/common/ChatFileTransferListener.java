@@ -7,10 +7,9 @@ import com.loopj.android.http.BinaryHttpResponseHandler;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.http.Header;
-import org.jivesoftware.smack.packet.Message;
-
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -25,14 +24,18 @@ public class ChatFileTransferListener implements Runnable {
         httpClient = c;
     }
 
-    BlockingQueue<Message> blockingQueue = new LinkedBlockingDeque<Message>();
+    BlockingQueue<Map> blockingQueue = new LinkedBlockingDeque<Map>();
 
-    public void put(Message msg) throws InterruptedException {
+    public void put(Map msg) throws InterruptedException {
         blockingQueue.put(msg);
     }
 
-    public Message take() throws InterruptedException {
+    public Map take() throws InterruptedException {
         return blockingQueue.take();
+    }
+
+    boolean check() {
+        return false;
     }
 
     @Override
@@ -43,9 +46,9 @@ public class ChatFileTransferListener implements Runnable {
     void task() {
         while (true) {
             try {
-                Message msg = take();//阻塞
-                String fileUrl = (String) msg.getProperty("c-fileurl");
-                final String filePath = (String) msg.getProperty("c-filepath");
+                Map msg = take();//阻塞
+                String fileUrl = (String) msg.get("fileurl");
+                final String filePath = (String) msg.get("filepath");
                 Log.d("ChatFileTransfer", "fileUrl " + fileUrl);
                 httpClient.get(fileUrl, new BinaryHttpResponseHandler() {
                     @Override
