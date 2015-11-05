@@ -27,7 +27,7 @@ public class IMessage {
     private String customType;
     private String fileUrl;
     private String filePath;
-    private Integer fileSize;
+    private Long fileSize;
 
     public int getId() {
         return id;
@@ -93,11 +93,11 @@ public class IMessage {
         this.filePath = filePath;
     }
 
-    public Integer getFileSize() {
+    public Long getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(Integer fileSize) {
+    public void setFileSize(Long fileSize) {
         this.fileSize = fileSize;
     }
 
@@ -115,7 +115,7 @@ public class IMessage {
         setCustomType((String) message.getProperty("c-type"));
         setFileUrl((String) message.getProperty("file-url"));
         setFilePath((String) message.getProperty("file-path"));
-        setFileSize((Integer) message.getProperty("file-size"));
+        setFileSize((Long) message.getProperty("file-size"));
     }
 
     public Message getMessage() {

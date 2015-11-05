@@ -346,8 +346,9 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                     showPlayAudioLayout();
                     String audioPath = (String) m.getProperty("file-path");
 //                    String audioUrl = (String) m.getProperty("audio-url");
-                    Integer audioSize = (Integer) m.getProperty("file-size");
-                    initPlayAudioBtn(audioPath, audioSize);
+                    Long audioSize = (Long) m.getProperty("file-size");
+                    int w = (int) (audioSize / 1000);//宽度规则
+                    initPlayAudioBtn(audioPath, w);
                 }
             } else {
                 showText();

@@ -68,7 +68,7 @@ public class ChatService extends RoboService {
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
 //        rec();
-        startFileTransTask();
+//        startFileTransTask();
     }
 
     void startFileTransTask() {
