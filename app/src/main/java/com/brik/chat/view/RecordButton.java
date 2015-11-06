@@ -127,7 +127,7 @@ public class RecordButton extends Button {
         }
 
         if (finishedListener != null)
-            finishedListener.onFinishedRecord(mFileName);
+            finishedListener.onFinishedRecord(intervalTime, mFileName);
     }
 
     private void cancelRecord() {
@@ -225,7 +225,7 @@ public class RecordButton extends Button {
     }
 
     public interface OnFinishedRecordListener {
-        public void onFinishedRecord(String audioPath);
+        public void onFinishedRecord(long time, String audioPath);
     }
 
 }

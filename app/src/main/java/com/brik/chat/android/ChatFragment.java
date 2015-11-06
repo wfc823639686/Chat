@@ -189,9 +189,9 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         recordBtn.setSavePath(pathStr);
         recordBtn.setOnFinishedRecordListener(new RecordButton.OnFinishedRecordListener() {
             @Override
-            public void onFinishedRecord(String audioPath) {
+            public void onFinishedRecord(long time, String audioPath) {
                 Log.d("onFinishedRecord", "audioPath: " + audioPath);
-                sendAudio(audioPath);
+                sendAudio(time, audioPath);
             }
         });
     }
@@ -318,14 +318,19 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             playAudioLayout.setVisibility(View.VISIBLE);
         }
 
-        void initPlayAudioBtn(String path, int w) {
+        void initPlayAudioBtn(String path, long timeLength) {
             playAudioButton.setAudioFilePath(path);
             //设置最大／小宽度
-            if(w<100) {
-                w = 100;
-            }
-            if(w>200) {
+            int w = 200;//没秒的长度
+            int seconds = (int) (timeLength / 1000);
+            w *= seconds;
+            Log.d("path audio s", ""+seconds);
+            Log.d("path audio w", ""+w);
+            if(w<=200) {
                 w = 200;
+            }
+            if(w>=1000) {
+                w = 1000;
             }
             playAudioButton.setPlayButtonWidth(w);
         }
@@ -346,9 +351,9 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                     showPlayAudioLayout();
                     String audioPath = (String) m.getProperty("file-path");
 //                    String audioUrl = (String) m.getProperty("audio-url");
-                    Long audioSize = (Long) m.getProperty("file-size");
-                    int w = (int) (audioSize / 1000);//宽度规则
-                    initPlayAudioBtn(audioPath, w);
+//                    Long audioSize = (Long) m.getProperty("file-size");
+                    Long timeLength = (Long) m.getProperty("time-length");
+                    initPlayAudioBtn(audioPath, timeLength==null?0:timeLength);
                 }
             } else {
                 showText();
@@ -412,7 +417,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         });
     }
 
-    public void sendAudio(final String filePath) {
+    public void sendAudio(final long time, final String filePath) {
         httpClient.uploadAudio(filePath, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(JSONObject response) {
@@ -424,6 +429,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 m.setProperty("file-size", new File(filePath).length());//文件大小
                 m.setProperty("file-url", audioUrl);
                 m.setProperty("file-path", filePath);
+                m.setProperty("time-length", time);
                 try {
                     ChatFragment.this.sendMessage(m);
                 } catch (XMPPException e) {

@@ -28,6 +28,7 @@ public class IMessage {
     private String fileUrl;
     private String filePath;
     private Long fileSize;
+    private Long timeLength;
 
     public int getId() {
         return id;
@@ -101,6 +102,14 @@ public class IMessage {
         this.fileSize = fileSize;
     }
 
+    public Long getTimeLength() {
+        return timeLength;
+    }
+
+    public void setTimeLength(Long timeLength) {
+        this.timeLength = timeLength;
+    }
+
     public IMessage(){}
 
     public IMessage(Message message) {
@@ -112,10 +121,11 @@ public class IMessage {
         setFrom(message.getFrom());
         setType(message.getType().name());
         setTo(message.getTo());
-        setCustomType((String) message.getProperty("c-type"));
-        setFileUrl((String) message.getProperty("file-url"));
-        setFilePath((String) message.getProperty("file-path"));
-        setFileSize((Long) message.getProperty("file-size"));
+        if(message.getProperty("c-type")!=null) setCustomType((String) message.getProperty("c-type"));
+        if(message.getProperty("file-url")!=null) setFileUrl((String) message.getProperty("file-url"));
+        if(message.getProperty("file-path")!=null) setFilePath((String) message.getProperty("file-path"));
+        if(message.getProperty("file-size")!=null) setFileSize((Long) message.getProperty("file-size"));
+        if(message.getProperty("time-length")!=null) setTimeLength((Long) message.getProperty("time-length"));
     }
 
     public Message getMessage() {
@@ -124,10 +134,11 @@ public class IMessage {
         message.setFrom(getFrom());
         message.setTo(getTo());
         message.setType(Message.Type.fromString(getType()));
-        message.setProperty("c-type", getCustomType());
-        message.setProperty("file-url", getFileUrl());
-        message.setProperty("file-path", getFilePath());
-        message.setProperty("file-size", getFileSize());
+        if(getCustomType()!=null) message.setProperty("c-type", getCustomType());
+        if(getFileUrl()!=null) message.setProperty("file-url", getFileUrl());
+        if(getFilePath()!=null) message.setProperty("file-path", getFilePath());
+        if(getFileSize()!=null) message.setProperty("file-size", getFileSize());
+        if(getTimeLength()!=null) message.setProperty("time-length", getTimeLength());
         return message;
     }
 

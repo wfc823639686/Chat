@@ -106,6 +106,7 @@ public class PlayAudioButton extends Button {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 MediaManager.release();
+                setText("播放");
             }
         });
         playing = true;

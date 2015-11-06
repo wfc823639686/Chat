@@ -119,7 +119,7 @@ public class MainActivity extends BaseActivity {
             currentFragment = showFragments(R.id.content, "login", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
             return;
         }
-        client.login("123456", "123456", new XMPPClient.LoginListener() {
+        client.login(username, password, new XMPPClient.LoginListener() {
             @Override
             public void onSuccess() {
                 Log.d("login", "成功");
