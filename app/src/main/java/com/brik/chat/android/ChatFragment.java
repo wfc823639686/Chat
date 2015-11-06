@@ -2,7 +2,10 @@ package com.brik.chat.android;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -20,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.brik.chat.common.BaseActivity;
 import com.brik.chat.common.BaseFragment;
 import com.brik.chat.common.HttpClient;
 import com.brik.chat.db.MessageDAO;
@@ -95,6 +99,25 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     @Inject
     private MessageDAO messageDAO;
 
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.getAction().equals(Constants.SEND_MESSAGE_ACTION)) {
+                IMessage im = intent.getParcelableExtra("message");
+                notifyMessageView(im);
+            }
+        }
+    };
+
+    void registerMessageReceiver() {
+        mContext.registerReceiver(messageReceiver, new IntentFilter(Constants.SEND_MESSAGE_ACTION));
+    }
+
+    void unregisterMessageReceiver() {
+        mContext.unregisterReceiver(messageReceiver);
+    }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -168,7 +191,14 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        registerMessageReceiver();
         return inflater.inflate(R.layout.fragment_chat, container, false);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unregisterMessageReceiver();
     }
 
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
@@ -380,9 +410,15 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             if(cType!=null) {
                 if(cType.equals("audio")) {
                     //是语音
-
+                    showPlayAudioLayout();
+                    String audioPath = (String) m.getProperty("file-path");
+//                    String audioUrl = (String) m.getProperty("audio-url");
+//                    Long audioSize = (Long) m.getProperty("file-size");
+                    Long timeLength = (Long) m.getProperty("time-length");
+                    initPlayAudioBtn(audioPath, timeLength==null?0:timeLength);
                 }
             } else {
+                showText();
                 textView.setText(m.getBody());
             }
         }
@@ -478,11 +514,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 }
                 break;
         }
-        if(mw!=null) {
-            mAdapter.add(mw);
-            int count = mAdapter.getItemCount();
-            mRecycler.getRecyclerView().scrollToPosition(count==0?0:count-1);
-        }
+        notifyMessageView(mw);
     }
 
     public void sendText(String message) {
@@ -492,6 +524,17 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             sendMessage(m);
         } catch (XMPPException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * 消息列表增加消息
+     */
+    public void notifyMessageView(IMessage mw) {
+        if(mw!=null) {
+            mAdapter.add(mw);
+            int count = mAdapter.getItemCount();
+            mRecycler.getRecyclerView().scrollToPosition(count==0?0:count-1);
         }
     }
 }

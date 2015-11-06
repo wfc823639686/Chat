@@ -5,7 +5,9 @@ package com.brik.chat.android;
  */
 public class Constants {
 
-    public static final String CHAT_SERVICE_ACTION = "com.brik.android.chat.service.ChatService";
+    public static final String CHAT_SERVICE_ACTION = "com.brik.chat.android.service.chat_service";
+
+    public static final String SEND_MESSAGE_ACTION = "com.brik.chat.android.receiver.send_message_action";
 
     public static final int CONNECT = 0x01;
     public static final int RESULT_CONNECT_SUCCESS = 0x41;

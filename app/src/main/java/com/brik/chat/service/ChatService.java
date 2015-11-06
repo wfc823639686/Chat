@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.brik.chat.android.Constants;
 import com.brik.chat.android.IChatService;
 import com.brik.chat.android.XMPPClient;
 import com.brik.chat.common.ChatFileTransferListener;
@@ -17,7 +19,10 @@ import com.j256.ormlite.logger.LoggerFactory;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Packet;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -67,7 +72,7 @@ public class ChatService extends RoboService {
         Notification notification = new Notification();
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
-//        rec();
+        rec();
 //        startFileTransTask();
     }
 
@@ -97,23 +102,41 @@ public class ChatService extends RoboService {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                client.getChatManager().addChatListener(new ChatManagerListener() {
+//                client.getChatManager().addChatListener(new ChatManagerListener() {
+//
+//                    @Override
+//                    public void chatCreated(Chat chat, boolean b) {
+//                        chat.addMessageListener(new MessageListener() {
+//                            public void processMessage(Chat newchat, Message message) {
+//                                if (message.getType() == Message.Type.chat) {
+//                                    messageDAO.add(new IMessage(message));
+//                                } else if (message.getType() == Message.Type.error) {
+//                                    System.out.println("error");
+//                                }
+//                            }
+//                        });
+//                    }
+//                });
 
-                    @Override
-                    public void chatCreated(Chat chat, boolean b) {
-                        chat.addMessageListener(new MessageListener() {
-                            public void processMessage(Chat newchat, Message message) {
-                                if (message.getType() == Message.Type.chat) {
-                                    messageDAO.add(new IMessage(message));
-                                } else if (message.getType() == Message.Type.error) {
-                                    System.out.println("error");
-                                }
-                            }
-                        });
+                //接收message
+                client.getXMPPConnection().addPacketListener(new PacketListener() {
+
+                    public void processPacket(Packet packet) {
+                        Message message = (Message) packet;
+                        System.out.println("收到消息 " + message.toXML());
+                        sendBroadcastMessage(message);
                     }
-                });
+                }, new PacketTypeFilter(Message.class));
+
             }
         });
+    }
+
+    void sendBroadcastMessage(Message message) {
+        IMessage im = new IMessage(message);
+        Intent intent = new Intent(Constants.SEND_MESSAGE_ACTION);
+        intent.putExtra("message", im);
+        this.sendBroadcast(intent);
     }
 
     /**

@@ -42,7 +42,7 @@
 
         <service android:name="com.brik.chat.service.ChatService" android:exported="true">
             <intent-filter>
-                <action android:name="com.brik.android.chat.service.ChatService"/>
+                <action android:name="com.brik.chat.android.service.chat_service"/>
             </intent-filter>
         </service>
     </application>

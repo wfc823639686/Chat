@@ -1,18 +1,17 @@
 package com.brik.chat.entry;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
-import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.packet.Message;
-
-import java.util.Map;
 
 /**
  * Created by wangfengchen on 15/7/8.
  */
 @DatabaseTable(tableName="imessage")
-public class IMessage {
+public class IMessage implements Parcelable {
 
     @DatabaseField(generatedId = true)
     private int id;
@@ -140,6 +139,49 @@ public class IMessage {
         if(getFileSize()!=null) message.setProperty("file-size", getFileSize());
         if(getTimeLength()!=null) message.setProperty("time-length", getTimeLength());
         return message;
+    }
+
+
+
+    private IMessage(Parcel in) {
+        setId(in.readInt());
+        setType(in.readString());
+        setBody(in.readString());
+        setFrom(in.readString());
+        setTo(in.readString());
+        setCustomType(in.readString());
+        setFileUrl(in.readString());
+        setFilePath(in.readString());
+        setFileSize(in.readLong());
+        setTimeLength(in.readLong());
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(getId());
+        parcel.writeString(getType());
+        parcel.writeString(getBody());
+        parcel.writeString(getFrom());
+        parcel.writeString(getTo());
+        parcel.writeString(getCustomType());
+        parcel.writeString(getFileUrl());
+        parcel.writeString(getFilePath());
+        parcel.writeLong(getFileSize() == null ? 0 : getFileSize());
+        parcel.writeLong(getTimeLength() == null ? 0 : getTimeLength());
+    }
+
+    public static final Parcelable.Creator<IMessage> CREATOR = new Parcelable.Creator<IMessage>() {
+        public IMessage createFromParcel(Parcel in) {
+            return new IMessage(in);
+        }
+
+        public IMessage[] newArray(int size) {
+            return new IMessage[size];
+        }
+    };
+
+    public int describeContents() {
+        return 0;
     }
 
 }
