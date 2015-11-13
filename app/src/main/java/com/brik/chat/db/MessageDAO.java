@@ -62,7 +62,7 @@ public class MessageDAO extends BaseDAO<IMessage> {
 
     public List<IMessage> getGroupMessage(String groupId,long offset, long limit) throws SQLException {
         QueryBuilder<IMessage, Integer> queryBuilder  = dao.queryBuilder();
-        queryBuilder.where().eq("room_id", groupId).and().eq("type", "groupchat");
+        queryBuilder.where().like("room_id", groupId+"%").and().eq("type", "groupchat");
         return queryBuilder.offset(offset).limit(limit).query();
     }
 }

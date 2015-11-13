@@ -287,7 +287,7 @@ public class XMPPClient {
     }
 
     public String getUser() {
-        return "123456@snowyoung.org";
+        return xmppConnection.getUser().split("/")[0];
     }
 
     public Roster getRoster() {

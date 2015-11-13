@@ -303,7 +303,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 Log.d("uploadAudio", "onSuccess result " + response);
                 String audioUrl = response.optString("url");
                 IMessage im = new IMessage();
-                im.setCustomType("audio");//自定义type
+                im.setCustomType(IMessage.CUSTOM_TYPE_AUDIO);//自定义type
                 im.setFileSize(new File(filePath).length());//文件大小
                 im.setFileUrl(audioUrl);
                 im.setFilePath(filePath);
@@ -336,6 +336,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             case 1://user
                 if(chat!=null) {
                     chat.sendMessage(im.getMessage());
+                    im.setFrom(XMPPClient.getInstance().getUser());
+                    im.setTo(chat.getParticipant());
                     im.setRoomId(user);
                 }else {//如果为空，则重试
 
@@ -359,6 +361,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     public void sendText(String message) {
         try {
             IMessage im = new IMessage();
+            im.setCustomType(IMessage.CUSTOM_TYPE_TEXT);
             im.setBody(message);
             sendMessage(im);
         } catch (XMPPException e) {

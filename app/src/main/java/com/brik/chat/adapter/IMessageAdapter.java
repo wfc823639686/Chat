@@ -69,7 +69,7 @@ public class IMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new MyTextViewHolder(view);
             }
             case OTHER_TEXT: {
-                View view = mLayoutInflater.inflate(R.layout.item_other_message, parent, false);
+                View view = mLayoutInflater.inflate(R.layout.item_other_message_text, parent, false);
                 return new OtherTextViewHolder(view);
             }
         }
@@ -106,6 +106,7 @@ public class IMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemViewType(int position) {
         //0 me 1 order
         IMessage mw = items.get(position);
+        Log.d("Message Adapter", "from user "+mw.getFromUser());
         boolean isMe = XMPPClient.getInstance().getUser().equals(mw.getFromUser());
         Log.d("Message Adapter", "pos "+position+" isMe? "+ isMe);
         switch (mw.getCustomType()) {
