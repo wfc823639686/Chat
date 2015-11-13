@@ -58,8 +58,8 @@ public class RecordButton extends Button {
 
     private Dialog recordIndicator;
 
-    private static int[] res = { R.drawable.mic_2, R.drawable.mic_3,
-            R.drawable.mic_4, R.drawable.mic_5 };
+    private static int[] res = { R.mipmap.mic_2, R.mipmap.mic_3,
+            R.mipmap.mic_4, R.mipmap.mic_5 };
 
     private static ImageView view;
 
@@ -102,7 +102,7 @@ public class RecordButton extends Button {
         recordIndicator = new Dialog(getContext(),
                 R.style.like_toast_dialog_style);
         view = new ImageView(getContext());
-        view.setImageResource(R.drawable.mic_2);
+        view.setImageResource(R.mipmap.mic_2);
         recordIndicator.setContentView(view, new LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));

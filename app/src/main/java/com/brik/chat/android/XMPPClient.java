@@ -57,9 +57,11 @@ import org.jivesoftware.smackx.search.UserSearchManager;
 
 import java.io.File;
 import java.lang.String;import java.lang.System;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -105,6 +107,12 @@ public class XMPPClient {
 
     public interface GetOfflineMessageListener {
         void onSuccess();
+        void onFail(Throwable t);
+        void onComplete();
+    }
+
+    public interface LoadMessageFromDBListener {
+        void onSuccess(List<IMessage> list);
         void onFail(Throwable t);
         void onComplete();
     }
@@ -359,6 +367,34 @@ public class XMPPClient {
                 } catch (Exception e) {
                     e.printStackTrace();
                     listener.onFail(e);
+                }
+            }
+        });
+    }
+
+    /*
+     * db
+     */
+    public void saveMessage(IMessage im) {
+        messageDAO.add(im);
+    }
+
+    public List<IMessage> loadMessageFromDB(String user, int p) throws SQLException {
+        return messageDAO.getMessage(user, p, 20);
+    }
+
+    public void loadMessageFromDB(final String user, final int p, final LoadMessageFromDBListener listener) {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    List<IMessage> list = loadMessageFromDB(user,p);
+                    listener.onSuccess(list);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    listener.onFail(e);
+                } finally {
+                    listener.onComplete();
                 }
             }
         });

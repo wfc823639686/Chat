@@ -11,14 +11,8 @@ import com.brik.chat.android.IChatService;
 import com.brik.chat.android.XMPPClient;
 import com.brik.chat.common.ChatFileTransferListener;
 import com.brik.chat.common.HttpClient;
-import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
 import com.google.inject.Inject;
-import com.j256.ormlite.logger.Logger;
-import com.j256.ormlite.logger.LoggerFactory;
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
@@ -33,10 +27,6 @@ import roboguice.service.RoboService;
  */
 public class ChatService extends RoboService {
 
-    Logger logger = LoggerFactory.getLogger(ChatService.class);
-
-    @Inject
-    MessageDAO messageDAO;
     @Inject
     XMPPClient client;
 
@@ -67,7 +57,7 @@ public class ChatService extends RoboService {
     @Override
     public void onCreate() {
         super.onCreate();
-        logger.warn("onCreate -----------------");
+        Log.d("ChatService", "onCreate");
         chatFileTransferListener = new ChatFileTransferListener(this, httpClient);
         Notification notification = new Notification();
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
@@ -93,7 +83,7 @@ public class ChatService extends RoboService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        logger.warn("onDestroy -----------------");
+        Log.d("ChatService", "onDestroy");
         stopForeground(false);
     }
 
@@ -124,7 +114,10 @@ public class ChatService extends RoboService {
                     public void processPacket(Packet packet) {
                         Message message = (Message) packet;
                         System.out.println("收到消息 " + message.toXML());
-                        sendBroadcastMessage(message);
+                        IMessage im = new IMessage(message);
+                        im.setRoomId(message.getFrom());
+                        client.saveMessage(im);
+                        sendBroadcastMessage(im);
                     }
                 }, new PacketTypeFilter(Message.class));
 
@@ -132,8 +125,7 @@ public class ChatService extends RoboService {
         });
     }
 
-    void sendBroadcastMessage(Message message) {
-        IMessage im = new IMessage(message);
+    void sendBroadcastMessage(IMessage im) {
         Intent intent = new Intent(Constants.SEND_MESSAGE_ACTION);
         intent.putExtra("message", im);
         this.sendBroadcast(intent);

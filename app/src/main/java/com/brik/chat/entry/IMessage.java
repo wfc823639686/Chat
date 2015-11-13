@@ -23,11 +23,18 @@ public class IMessage implements Parcelable {
     private String from;
     @DatabaseField
     private String to;
+    @DatabaseField
     private String customType;
+    @DatabaseField
     private String fileUrl;
+    @DatabaseField
     private String filePath;
+    @DatabaseField
     private Long fileSize;
+    @DatabaseField
     private Long timeLength;
+    @DatabaseField
+    private String roomId;
 
     public int getId() {
         return id;
@@ -107,6 +114,14 @@ public class IMessage implements Parcelable {
 
     public void setTimeLength(Long timeLength) {
         this.timeLength = timeLength;
+    }
+
+    public String getRoomId() {
+        return roomId;
+    }
+
+    public void setRoomId(String roomId) {
+        this.roomId = roomId;
     }
 
     public IMessage(){}

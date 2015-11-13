@@ -54,14 +54,14 @@ public class HttpClient {
     }
 
     public void uploadAudio(String filePath, ResponseHandlerInterface handler) {
-        String url = SystemSettings.SERVICE_HOST + "/upload/uploadFile.htm";
+        String url = SystemSettings.SERVICE_HOST + "/upload/uploadFileForPhone.htm";
         RequestParams params = new RequestParams();
         try {
             params.put("upload", new File(filePath));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        params.add("uid", "-100");
+        params.add("dir", "-100");
         client.post(url, params, handler);
     }
 

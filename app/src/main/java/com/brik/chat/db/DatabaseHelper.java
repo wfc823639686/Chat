@@ -18,7 +18,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     // 数据库名称
     private static final String DATABASE_NAME = "iczcache1.db";
     // 数据库version
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 13;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

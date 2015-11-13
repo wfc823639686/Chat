@@ -21,8 +21,10 @@
     </style>
 
     <style name="Message">
-        <item name="android:textColor">#000</item>
-        <item name="android:textSize">15sp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+        <item name="android:textColor">#222</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="Message.Head">
@@ -31,8 +33,16 @@
         <item name="android:background">#eee</item>
     </style>
 
-    <style name="Message.Text">
+    <style name="Message.OtherText">
+        <item name="android:paddingLeft">6dp</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:background">@drawable/bg_audio_play_other_btn</item>
+    </style>
 
+    <style name="Message.MeText">
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingRight">6dp</item>
+        <item name="android:background">@drawable/bg_audio_play_me_btn</item>
     </style>
 
     <style name="Label">
@@ -74,6 +84,18 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowBackground">@drawable/round_background</item>
+    </style>
+
+    <style name="MeAudioPlayBtn">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:background">@drawable/bg_audio_play_me_btn</item>
+    </style>
+
+    <style name="OtherAudioPlayBtn">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:background">@drawable/bg_audio_play_other_btn</item>
     </style>
 
 </resources>

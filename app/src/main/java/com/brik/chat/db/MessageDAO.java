@@ -53,9 +53,10 @@ public class MessageDAO extends BaseDAO<IMessage> {
         return null;
     }
 
-    public List<IMessage> getMessage(String from,long offset, long limit) throws SQLException {
+    public List<IMessage> getMessage(String user,long offset, long limit) throws SQLException {
         QueryBuilder<IMessage, Integer> queryBuilder  = dao.queryBuilder();
-        queryBuilder.where().like("from", "%"+from+"%").or().like("to", "%"+from+"%");
+//        queryBuilder.where().like("from", "%"+user+"%").or().like("to", "%"+user+"%");
+        queryBuilder.where().eq("roomId", user);
         return queryBuilder.offset(offset).limit(limit).query();
     }
 }

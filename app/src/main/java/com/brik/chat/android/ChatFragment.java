@@ -26,14 +26,12 @@ import android.widget.TextView;
 import com.brik.chat.common.BaseActivity;
 import com.brik.chat.common.BaseFragment;
 import com.brik.chat.common.HttpClient;
-import com.brik.chat.db.MessageDAO;
 import com.brik.chat.entry.IMessage;
 import com.brik.chat.view.PlayAudioButton;
 import com.brik.chat.view.RecordButton;
 import com.google.inject.Inject;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.PacketListener;
@@ -96,8 +94,6 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     private Context mContext;
 
     private IChatService mService;
-    @Inject
-    private MessageDAO messageDAO;
 
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
 
@@ -178,16 +174,6 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         }
     }
 
-    void getMessageFromDB(int p) {
-        try {
-            List<IMessage> ormMessageList = messageDAO.getMessage(user, p, 10);
-            mAdapter.addAllAtStart(ormMessageList);
-            mRecycler.getSwipeToRefresh().setRefreshing(false);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -259,7 +245,32 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onRefresh() {
-        getMessageFromDB(p++);
+        client.loadMessageFromDB(user, p++, new XMPPClient.LoadMessageFromDBListener() {
+            @Override
+            public void onSuccess(final List<IMessage> list) {
+                mRecycler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.addAllAtStart(list);
+                    }
+                });
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                mRecycler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRecycler.getSwipeToRefresh().setRefreshing(false);
+                    }
+                });
+            }
+        });
     }
 
     class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -427,6 +438,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     void createChat() {
         System.out.println("监听聊天消息...");
         chat = client.getChatManager().createChat(user, null);
+        Log.d("chat getThreadID", chat.getThreadID());
+        Log.d("chat getParticipant", chat.getParticipant());
     }
 
     void createMultiChat() {
@@ -496,7 +509,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 if(chat!=null) {
                     chat.sendMessage(m);
                     mw = new IMessage(m);
-                    messageDAO.add(mw);
+                    mw.setRoomId(user);
                 }else {//如果为空，则重试
                     m.setError(new XMPPError(-1));//发送失败，请重试
                 }
@@ -508,7 +521,6 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                     m.setFrom(XMPPClient.getInstance().getUser());
                     muc.sendMessage(m);
                     mw = new IMessage(m);
-                    messageDAO.add(mw);
                 }else {//如果为空，则重试
                     m.setError(new XMPPError(-1));//发送失败，请重试
                 }
