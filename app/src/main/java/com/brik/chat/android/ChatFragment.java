@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -20,35 +19,24 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.brik.chat.common.BaseActivity;
+import com.brik.chat.adapter.IMessageAdapter;
 import com.brik.chat.common.BaseFragment;
 import com.brik.chat.common.HttpClient;
 import com.brik.chat.entry.IMessage;
-import com.brik.chat.view.PlayAudioButton;
 import com.brik.chat.view.RecordButton;
 import com.google.inject.Inject;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
 
 import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Message;
-import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.XMPPError;
 import org.jivesoftware.smackx.muc.MultiUserChat;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-
-import roboguice.fragment.RoboFragment;
 import roboguice.inject.InjectView;
 
 /**
@@ -89,7 +77,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     @Inject
     private LayoutInflater layoutInflater;
 
-    private MyAdapter mAdapter = new MyAdapter();
+    private IMessageAdapter mAdapter;
 
     private Context mContext;
 
@@ -169,6 +157,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mContext = activity;
+        mAdapter = new IMessageAdapter(activity, "chat");
         if(activity instanceof ChatActivity) {
             mService = ((ChatActivity)activity).getIChatService();
         }
@@ -273,167 +262,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         });
     }
 
-    class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private List<IMessage> items = new ArrayList<>();
-
-        public void add(IMessage item) {
-            items.add(item);
-            notifyItemInserted(items.size() - 1);
-        }
-
-        public void addAllAtStart(List<IMessage> list) {
-            items.addAll(0, list);
-            notifyDataSetChanged();
-        }
-
-        public IMessage getItem(int position) {
-            return items.get(position);
-        }
-
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            if(viewType==0) {
-                View view = layoutInflater.inflate(R.layout.item_my_message, parent, false);
-                return new MyViewHolder(view);
-            } else {
-                View view = layoutInflater.inflate(R.layout.item_other_message, parent, false);
-                return new OtherViewHolder(view);
-            }
-        }
-
-        @Override
-        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            int viewType = getItemViewType(position);
-            if(viewType==0) {
-                MyViewHolder vh = (MyViewHolder) holder;
-                vh.bindView(getItem(position));
-            } else {
-                OtherViewHolder vh = (OtherViewHolder) holder;
-                vh.bindView(getItem(position));
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            //0 me 1 order
-            IMessage mw = items.get(position);
-            Message m = mw.getMessage();
-            String[] fs = m.getFrom().split("/");
-            switch (userType) {
-                case 1:
-                    return chat.getParticipant().equals(fs[0]) ? 1 : 0;
-                case 2:
-                    return XMPPClient.getInstance().getUser().equals(fs[0]) ? 0 : 1;
-            }
-            return -1;
-        }
-
-    };
-
-    class BaseViewHolder extends RecyclerView.ViewHolder {
-        protected TextView textView;
-        protected ImageView headView;
-        protected PlayAudioButton playAudioButton;
-        protected View playAudioLayout;
-        public BaseViewHolder(View itemView) {
-            super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.item_text);
-            headView = (ImageView) itemView.findViewById(R.id.item_head);
-            playAudioLayout = itemView.findViewById(R.id.item_play_audio_layout);
-            playAudioButton = (PlayAudioButton) itemView.findViewById(R.id.item_play_audio_btn);
-        }
-
-        void showText() {
-            textView.setVisibility(View.VISIBLE);
-            playAudioLayout.setVisibility(View.GONE);
-        }
-
-        void showPlayAudioLayout() {
-            textView.setVisibility(View.GONE);
-            playAudioLayout.setVisibility(View.VISIBLE);
-        }
-
-        void initPlayAudioBtn(String path, long timeLength) {
-            playAudioButton.setAudioFilePath(path);
-            //设置最大／小宽度
-            int w = 200;//没秒的长度
-            int seconds = (int) (timeLength / 1000);
-            w *= seconds;
-            Log.d("path audio s", ""+seconds);
-            Log.d("path audio w", ""+w);
-            if(w<=200) {
-                w = 200;
-            }
-            if(w>=1000) {
-                w = 1000;
-            }
-            playAudioButton.setPlayButtonWidth(w);
-        }
-    }
-
-    class MyViewHolder extends BaseViewHolder {
-
-        public MyViewHolder(View itemView) {
-            super(itemView);
-        }
-
-        void bindView(IMessage mw) {
-            Message m = mw.getMessage();
-            String cType = (String) m.getProperty("c-type");
-            if(cType!=null) {
-                if(cType.equals("audio")) {
-                    //是语音
-                    showPlayAudioLayout();
-                    String audioPath = (String) m.getProperty("file-path");
-//                    String audioUrl = (String) m.getProperty("audio-url");
-//                    Long audioSize = (Long) m.getProperty("file-size");
-                    Long timeLength = (Long) m.getProperty("time-length");
-                    initPlayAudioBtn(audioPath, timeLength==null?0:timeLength);
-                }
-            } else {
-                showText();
-                textView.setText(m.getBody());
-            }
-            XMPPError error = m.getError();
-            if(error!=null) {
-                if(error.getCode()==-1) {
-                    //重试
-                }
-            }
-        }
-    }
-
-    class OtherViewHolder extends BaseViewHolder {
-
-        public OtherViewHolder(View itemView) {
-            super(itemView);
-        }
-
-        void bindView(IMessage mw) {
-            Message m = mw.getMessage();
-            String cType = (String) m.getProperty("c-type");
-            if(cType!=null) {
-                if(cType.equals("audio")) {
-                    //是语音
-                    showPlayAudioLayout();
-                    String audioPath = (String) m.getProperty("file-path");
-//                    String audioUrl = (String) m.getProperty("audio-url");
-//                    Long audioSize = (Long) m.getProperty("file-size");
-                    Long timeLength = (Long) m.getProperty("time-length");
-                    initPlayAudioBtn(audioPath, timeLength==null?0:timeLength);
-                }
-            } else {
-                showText();
-                textView.setText(m.getBody());
-            }
-        }
-    }
 
     void createChat() {
         System.out.println("监听聊天消息...");
@@ -443,27 +272,27 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     }
 
     void createMultiChat() {
-        try {
-            muc = new MultiUserChat(client.getXMPPConnection(), multiUserRoom);
-            // 创建聊天室,进入房间后的nickname
-            muc.join("123456");
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-        muc.addMessageListener(new PacketListener() {
-            @Override
-            public void processPacket(Packet packet) {
-                final Message message = (Message) packet;
-                String result = message.getFrom() + ":" + message.getBody();
-                System.out.println(result);
-                mRecycler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.add(new IMessage(message));
-                    }
-                });
-            }
-        });
+//        try {
+//            muc = new MultiUserChat(client.getXMPPConnection(), multiUserRoom);
+//            // 创建聊天室,进入房间后的nickname
+//            muc.join("123456");
+//        } catch (XMPPException e) {
+//            e.printStackTrace();
+//        }
+//        muc.addMessageListener(new PacketListener() {
+//            @Override
+//            public void processPacket(Packet packet) {
+//                final Message message = (Message) packet;
+//                String result = message.getFrom() + ":" + message.getBody();
+//                System.out.println(result);
+//                mRecycler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mAdapter.add(new IMessage(message));
+//                    }
+//                });
+//            }
+//        });
     }
 
     public void sendAudio(final long time, final String filePath) {
@@ -473,14 +302,14 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 super.onSuccess(response);
                 Log.d("uploadAudio", "onSuccess result " + response);
                 String audioUrl = response.optString("url");
-                Message m = new Message();
-                m.setProperty("c-type", "audio");//自定义type
-                m.setProperty("file-size", new File(filePath).length());//文件大小
-                m.setProperty("file-url", audioUrl);
-                m.setProperty("file-path", filePath);
-                m.setProperty("time-length", time);
+                IMessage im = new IMessage();
+                im.setCustomType("audio");//自定义type
+                im.setFileSize(new File(filePath).length());//文件大小
+                im.setFileUrl(audioUrl);
+                im.setFilePath(filePath);
+                im.setTimeLength(time);
                 try {
-                    ChatFragment.this.sendMessage(m);
+                    ChatFragment.this.sendMessage(im);
                 } catch (XMPPException e) {
                     e.printStackTrace();
                 }
@@ -502,38 +331,36 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     }
 
-    public void sendMessage(Message m) throws XMPPException {
-        IMessage mw = null;
+    public void sendMessage(IMessage im) throws XMPPException {
         switch (userType) {
             case 1://user
                 if(chat!=null) {
-                    chat.sendMessage(m);
-                    mw = new IMessage(m);
-                    mw.setRoomId(user);
+                    chat.sendMessage(im.getMessage());
+                    im.setRoomId(user);
                 }else {//如果为空，则重试
-                    m.setError(new XMPPError(-1));//发送失败，请重试
+
                 }
                 break;
             case 2://room
-                if(muc!=null) {
-                    m.setTo(muc.getRoom());
-                    m.setType(Message.Type.groupchat);
-                    m.setFrom(XMPPClient.getInstance().getUser());
-                    muc.sendMessage(m);
-                    mw = new IMessage(m);
-                }else {//如果为空，则重试
-                    m.setError(new XMPPError(-1));//发送失败，请重试
-                }
+//                if(muc!=null) {
+//                    m.setTo(muc.getRoom());
+//                    m.setType(Message.Type.groupchat);
+//                    m.setFrom(XMPPClient.getInstance().getUser());
+//                    muc.sendMessage(m);
+//                    mw = new IMessage(m);
+//                }else {//如果为空，则重试
+//
+//                }
                 break;
         }
-        notifyMessageView(mw);
+        notifyMessageView(im);
     }
 
     public void sendText(String message) {
         try {
-            Message m = new Message();
-            m.setBody(message);
-            sendMessage(m);
+            IMessage im = new IMessage();
+            im.setBody(message);
+            sendMessage(im);
         } catch (XMPPException e) {
             e.printStackTrace();
         }

@@ -16,9 +16,9 @@ import java.sql.SQLException;
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String TAG = "DatabaseHelper";
     // 数据库名称
-    private static final String DATABASE_NAME = "iczcache1.db";
+    private static final String DATABASE_NAME = "chatdata.db";
     // 数据库version
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 15;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

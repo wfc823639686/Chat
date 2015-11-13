@@ -3,6 +3,7 @@ package com.brik.chat.entry;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import org.jivesoftware.smack.packet.Message;
@@ -12,6 +13,11 @@ import org.jivesoftware.smack.packet.Message;
  */
 @DatabaseTable(tableName="imessage")
 public class IMessage implements Parcelable {
+
+    public static final String CUSTOM_TYPE_TEXT = "text";
+    public static final String CUSTOM_TYPE_AUDIO = "audio";
+    public static final String CUSTOM_TYPE_IMAGE = "image";
+    public static final String CUSTOM_TYPE_FILE = "file";
 
     @DatabaseField(generatedId = true)
     private int id;
@@ -23,18 +29,20 @@ public class IMessage implements Parcelable {
     private String from;
     @DatabaseField
     private String to;
-    @DatabaseField
+    @DatabaseField(columnName="custom_type")
     private String customType;
-    @DatabaseField
+    @DatabaseField(columnName="file_url")
     private String fileUrl;
-    @DatabaseField
+    @DatabaseField(columnName="file_path")
     private String filePath;
-    @DatabaseField
+    @DatabaseField(columnName="file_size")
     private Long fileSize;
-    @DatabaseField
+    @DatabaseField(columnName="time_length")
     private Long timeLength;
-    @DatabaseField
+    @DatabaseField(columnName="room_id")
     private String roomId;
+
+    private String fromUser;
 
     public int getId() {
         return id;
@@ -124,6 +132,15 @@ public class IMessage implements Parcelable {
         this.roomId = roomId;
     }
 
+    public String getFromUser() {
+        if(from==null) return null;
+        return from.split("/")[0];
+    }
+
+    public void setFromUser(String fromUser) {
+        this.fromUser = fromUser;
+    }
+
     public IMessage(){}
 
     public IMessage(Message message) {
@@ -135,7 +152,7 @@ public class IMessage implements Parcelable {
         setFrom(message.getFrom());
         setType(message.getType().name());
         setTo(message.getTo());
-        if(message.getProperty("c-type")!=null) setCustomType((String) message.getProperty("c-type"));
+        if(message.getProperty("custom-type")!=null) setCustomType((String) message.getProperty("custom-type"));
         if(message.getProperty("file-url")!=null) setFileUrl((String) message.getProperty("file-url"));
         if(message.getProperty("file-path")!=null) setFilePath((String) message.getProperty("file-path"));
         if(message.getProperty("file-size")!=null) setFileSize((Long) message.getProperty("file-size"));
@@ -148,7 +165,7 @@ public class IMessage implements Parcelable {
         message.setFrom(getFrom());
         message.setTo(getTo());
         message.setType(Message.Type.fromString(getType()));
-        if(getCustomType()!=null) message.setProperty("c-type", getCustomType());
+        if(getCustomType()!=null) message.setProperty("custom-type", getCustomType());
         if(getFileUrl()!=null) message.setProperty("file-url", getFileUrl());
         if(getFilePath()!=null) message.setProperty("file-path", getFilePath());
         if(getFileSize()!=null) message.setProperty("file-size", getFileSize());
