@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <ImageView
+        style="@style/Message.Head"
+        android:id="@+id/item_head"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+            <view
+                class="com.brik.chat.view.PlayAudioButton"
+                android:id="@+id/item_play_audio_btn"
+                style="@style/OtherAudioPlayBtn"
+                android:layout_alignTop="@+id/item_head"
+                android:layout_toRightOf="@+id/item_head"
+                android:layout_toEndOf="@+id/item_head" />
+
+</RelativeLayout>

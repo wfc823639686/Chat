@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -31,7 +32,12 @@ import org.apache.http.Header;
 import java.io.File;
 import java.io.IOException;
 
-public class PlayAudioButton extends Button {
+public class PlayAudioButton extends ImageButton {
+
+    public static final int PLAY = 0x01;
+    public static final int STOP = 0x02;
+    public static final int LOADING = 0x03;
+    public static final int LOAD_FAIL = 0x04;
 
     private boolean playing;
 
@@ -53,7 +59,7 @@ public class PlayAudioButton extends Button {
     }
 
     void init() {
-        setText("播放");
+        progress(PLAY);
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,7 +76,7 @@ public class PlayAudioButton extends Button {
         audio = new File(mFileName);
         if(!audio.exists()) {
             //开始下载
-            setText("正在下载");
+            progress(LOADING);
             HttpClient.getInstance().get(mFileUrl, new BinaryHttpResponseHandler() {
 
                 @Override
@@ -82,7 +88,7 @@ public class PlayAudioButton extends Button {
                         startPlay();
                     } catch (IOException e) {
                         e.printStackTrace();
-                        setText("下载失败");
+                        progress(LOAD_FAIL);
                     }
                 }
 
@@ -90,7 +96,7 @@ public class PlayAudioButton extends Button {
                 public void onFailure(int statusCode, Header[] headers,
                                       byte[] binaryData, Throwable error) {
                     Log.d("loadFile", "onFailure");
-                    setText("下载失败");
+                    progress(LOAD_FAIL);
                 }
             });
         } else {
@@ -101,22 +107,26 @@ public class PlayAudioButton extends Button {
 
 
     void startPlay() {
-        setText("停止");
+        progress(STOP);
         MediaManager.playSound(mFileName, new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 MediaManager.release();
-                setText("播放");
+                progress(PLAY);
             }
         });
         playing = true;
     }
 
     void stopPlay() {
-        setText("播放");
+        progress(PLAY);
         MediaManager.stop();
         MediaManager.release();
         playing = false;
+    }
+
+    void progress(int p) {
+
     }
 
     public void setAudioFilePath(String path) {

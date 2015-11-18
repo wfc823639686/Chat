@@ -72,6 +72,14 @@ public class IMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 View view = mLayoutInflater.inflate(R.layout.item_other_message_text, parent, false);
                 return new OtherTextViewHolder(view);
             }
+            case ME_AUDIO: {
+                View view = mLayoutInflater.inflate(R.layout.item_my_message_audio, parent, false);
+                return new MyAudioViewHolder(view);
+            }
+            case OTHER_AUDIO: {
+                View view = mLayoutInflater.inflate(R.layout.item_my_message_audio, parent, false);
+                return new OtherAudioViewHolder(view);
+            }
         }
 //        if(viewType==0) {
 //            View view = mLayoutInflater.inflate(R.layout.item_my_message, parent, false);
@@ -176,7 +184,8 @@ class AudioBaseViewHolder extends BaseViewHolder {
         playAudioButton = (PlayAudioButton) itemView.findViewById(R.id.item_play_audio_btn);
     }
 
-    void initPlayAudioBtn(String path, long timeLength) {
+    void initPlayAudioBtn(String url, String path, long timeLength) {
+        playAudioButton.setAudioFileUrl(url);
         playAudioButton.setAudioFilePath(path);
         //设置最大／小宽度
         int w = 200;//没秒的长度
@@ -194,26 +203,25 @@ class AudioBaseViewHolder extends BaseViewHolder {
     }
 }
 
-//    Message m = mw.getMessage();
-//    String cType = (String) m.getProperty("c-type");
-//    if(cType!=null) {
-//        if(cType.equals("audio")) {
-//            //是语音
-//            showPlayAudioLayout();
-//            String audioPath = (String) m.getProperty("file-path");
-////                    String audioUrl = (String) m.getProperty("audio-url");
-////                    Long audioSize = (Long) m.getProperty("file-size");
-//            Long timeLength = (Long) m.getProperty("time-length");
-//            initPlayAudioBtn(audioPath, timeLength==null?0:timeLength);
-//        }
-//    } else {
-//        showText();
-//        textView.setText(m.getBody());
-//    }
-//    XMPPError error = m.getError();
-//    if(error!=null) {
-//        if(error.getCode()==-1) {
-//            //重试
-//        }
-//    }
+class MyAudioViewHolder extends AudioBaseViewHolder {
+
+    public MyAudioViewHolder(View itemView) {
+        super(itemView);
+    }
+
+    void bindView(IMessage mw) {
+        initPlayAudioBtn(mw.getFileUrl(), mw.getFilePath(), mw.getTimeLength());
+    }
+}
+
+class OtherAudioViewHolder extends AudioBaseViewHolder {
+
+    public OtherAudioViewHolder(View itemView) {
+        super(itemView);
+    }
+
+    void bindView(IMessage mw) {
+        initPlayAudioBtn(mw.getFileUrl(), mw.getFilePath(), mw.getTimeLength());
+    }
+}
 

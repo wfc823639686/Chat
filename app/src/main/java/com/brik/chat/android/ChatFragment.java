@@ -296,38 +296,38 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
     }
 
     public void sendAudio(final long time, final String filePath) {
-        httpClient.uploadAudio(filePath, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(JSONObject response) {
-                super.onSuccess(response);
-                Log.d("uploadAudio", "onSuccess result " + response);
-                String audioUrl = response.optString("url");
-                IMessage im = new IMessage();
-                im.setCustomType(IMessage.CUSTOM_TYPE_AUDIO);//自定义type
-                im.setFileSize(new File(filePath).length());//文件大小
-                im.setFileUrl(audioUrl);
-                im.setFilePath(filePath);
-                im.setTimeLength(time);
-                try {
-                    ChatFragment.this.sendMessage(im);
-                } catch (XMPPException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable e, JSONObject errorResponse) {
-                super.onFailure(e, errorResponse);
-                Log.d("uploadAudio", "onFailure result " + e + ",errorResponse " + errorResponse);
-                //TODO 上传出错，重试
-            }
-
-            @Override
-            public void onFinish() {
-                super.onFinish();
-                Log.d("uploadAudio", "onFinish");
-            }
-        });
+        IMessage im = new IMessage();
+        im.setCustomType(IMessage.CUSTOM_TYPE_AUDIO);//自定义type
+        im.setFileSize(new File(filePath).length());//文件大小
+//        im.setFileUrl(audioUrl);
+        im.setFilePath(filePath);
+        im.setTimeLength(time);
+        try {
+            ChatFragment.this.sendMessage(im);
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
+//        httpClient.uploadAudio(filePath, new JsonHttpResponseHandler() {
+//            @Override
+//            public void onSuccess(JSONObject response) {
+//                super.onSuccess(response);
+//                Log.d("uploadAudio", "onSuccess result " + response);
+//                String audioUrl = response.optString("url");
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable e, JSONObject errorResponse) {
+//                super.onFailure(e, errorResponse);
+//                Log.d("uploadAudio", "onFailure result " + e + ",errorResponse " + errorResponse);
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                super.onFinish();
+//                Log.d("uploadAudio", "onFinish");
+//            }
+//        });
 
     }
 
