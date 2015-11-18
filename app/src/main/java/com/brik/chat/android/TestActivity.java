@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.LogRecord;
 
 import roboguice.activity.RoboFragmentActivity;
 
@@ -38,11 +41,30 @@ public class TestActivity extends RoboFragmentActivity {
     @Inject
     MessageDAO messageDAO;
 
+    private Handler mHandler = new android.os.Handler(){
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case ChatService.CHAT_MESSAGE_CONNECT_CALLBACK:
+                    Log.d("TestActivity", "re callback");
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
+    private Messenger cMessenger = new Messenger(mHandler);
+    private Messenger sMessenger;
+
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = IChatService.Stub.asInterface(service);
-            testFileTransfer();
+//            mService = IChatService.Stub.asInterface(service);
+//            testFileTransfer();
+            sMessenger = new Messenger(service);
+            sendMessage();
         }
 
         @Override
@@ -50,6 +72,16 @@ public class TestActivity extends RoboFragmentActivity {
 
         }
     };
+
+    private void sendMessage() {
+        android.os.Message msg = android.os.Message.obtain(null, ChatService.CHAT_MESSAGE_CONNECT);//MessengerService.TEST=0
+        msg.replyTo = cMessenger;
+        try {
+            sMessenger.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 
     void startChatService() {
         Intent intent = new Intent(this, ChatService.class);
@@ -73,7 +105,7 @@ public class TestActivity extends RoboFragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-//        bindChatService();
+        bindChatService();
 //        testPlayAudio();
         testMessageDB();
     }

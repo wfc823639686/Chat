@@ -44,8 +44,6 @@ public class ContactFragment extends BaseFragment
 
     private MyAdapter mAdapter = new MyAdapter();
 
-    private IChatService mService;
-
     @Inject
     private LayoutInflater layoutInflater;
     @Inject
@@ -65,9 +63,6 @@ public class ContactFragment extends BaseFragment
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (activity instanceof MainActivity) {
-            mService = ((MainActivity) activity).getIChatService();
-        }
     }
 
     @Nullable

@@ -2,12 +2,15 @@ package com.brik.chat.service;
 
 import android.app.Notification;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.brik.chat.android.Constants;
 import com.brik.chat.android.IChatService;
+import com.brik.chat.android.R;
 import com.brik.chat.android.XMPPClient;
 import com.brik.chat.common.ChatFileTransferListener;
 import com.brik.chat.common.HttpClient;
@@ -18,6 +21,9 @@ import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import roboguice.service.RoboService;
@@ -42,9 +48,98 @@ public class ChatService extends RoboService {
         }
     };
 
+    private List<Messenger> mClients = new ArrayList<>();
+
+    public static void registerMessenger(Messenger service, Messenger client) throws RemoteException {
+        if(service==null) throw new RemoteException("service is null");
+        android.os.Message msg = android.os.Message.obtain(null, CHAT_MESSAGE_REGISTER_CLIENT);
+        msg.replyTo = client;
+        service.send(msg);
+    }
+
+    public static void unregisterMessenger(Messenger service, Messenger client) throws RemoteException {
+        if(service==null) throw new RemoteException("service is null");
+        android.os.Message msg = android.os.Message.obtain(null, CHAT_MESSAGE_UNREGISTER_CLIENT);
+        msg.replyTo = client;
+        service.send(msg);
+    }
+
+    public static final int CHAT_MESSAGE_REGISTER_CLIENT = 0x01;
+    public static final int CHAT_MESSAGE_UNREGISTER_CLIENT = 0x02;
+    public static final int CHAT_MESSAGE_CONNECT = 0x03;
+    public static final int CHAT_MESSAGE_CONNECT_CALLBACK = 0x04;
+
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(android.os.Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case CHAT_MESSAGE_REGISTER_CLIENT:
+                    if(msg.replyTo!=null) {
+                        mClients.add(msg.replyTo);
+                    }
+                    break;
+                case CHAT_MESSAGE_UNREGISTER_CLIENT:
+                    if(msg.replyTo!=null) {
+                        mClients.remove(msg.replyTo);
+                    }
+                    break;
+                case CHAT_MESSAGE_CONNECT:
+                    Log.d("chat Handler", "request connect");
+                    connect();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+    //It's the messenger of server
+    private Messenger sMessenger = new Messenger(mHandler);
+
+    private void connect() {
+        client.connect(new XMPPClient.ConnectListener() {
+            @Override
+            public void onSuccess() {
+                Log.d("connect", "成功");
+                sendConnectMessage(1);
+                rec();
+            }
+
+            @Override
+            public void onFail(Throwable t) {
+                Log.e("connect", "失败", t);
+                sendConnectMessage(0);
+            }
+        });
+    }
+
+    /**
+     * 发送连接msg
+     * @param success 1: 成功0: 失败
+     */
+    void sendConnectMessage(int success) {
+        android.os.Message msg = android.os.Message.obtain(null, CHAT_MESSAGE_CONNECT_CALLBACK);
+        msg.replyTo = sMessenger;
+        msg.arg1 = success;
+        sendMessage(msg);
+    }
+
+    void sendMessage(android.os.Message msg) {
+        for (int i = mClients.size() - 1; i >= 0; i --) {
+            try {
+                mClients.get(i).send(msg);
+            } catch (RemoteException e) {
+                // The client is dead.  Remove it from the list;
+                // we are going through the list from back to front
+                // so this is safe to do inside the loop.
+                mClients.remove(i);
+            }
+        }
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
-        return mService;
+        return sMessenger.getBinder();
     }
 
     @Inject
@@ -62,7 +157,6 @@ public class ChatService extends RoboService {
         Notification notification = new Notification();
         notification.flags = Notification.FLAG_NO_CLEAR|Notification.FLAG_ONGOING_EVENT;
         startForeground(getClass().hashCode(), notification);
-        rec();
 //        startFileTransTask();
     }
 
@@ -112,8 +206,8 @@ public class ChatService extends RoboService {
                 client.getXMPPConnection().addPacketListener(new PacketListener() {
 
                     public void processPacket(Packet packet) {
-                        Message message = (Message) packet;
-                        System.out.println("收到消息 " + message.toXML());
+                        Message message =
+                                (Message) packet;
                         IMessage im = new IMessage(message);
                         im.setRoomId(message.getFrom());
                         client.saveMessage(im);

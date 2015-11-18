@@ -7,6 +7,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.Fragment;
@@ -37,7 +38,7 @@ public class MainActivity extends BaseActivity {
     @Inject
     private SystemSettings settings;
 
-    private IChatService mService;
+    private Messenger sMessenger;
 
     TextView titleView;
 
@@ -45,10 +46,35 @@ public class MainActivity extends BaseActivity {
 
     BaseFragment currentFragment;
 
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case ChatService.CHAT_MESSAGE_CONNECT_CALLBACK:
+                    if(msg.arg1==1) {
+                        //连接成功
+                        Log.d("", "connect success");
+                        login();
+                    } else {
+                        Log.d("", "connect fail");
+                    }
+                    break;
+            }
+        }
+    };
+
+    private Messenger cMessenger = new Messenger(mHandler);
+
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = IChatService.Stub.asInterface(service);
+            sMessenger = new Messenger(service);
+            try {
+                ChatService.registerMessenger(sMessenger, cMessenger);
+                connect();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
 
         @Override public void onServiceDisconnected(ComponentName name) {
@@ -58,24 +84,20 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected BaseFragment getFragmentByTag(String tag) {
-        if(tag.equals("contact")) {
-            return new ContactFragment();
-        } else if(tag.equals("createmulti")){
-            return new CreateMultiUserChatFragment();
-        } else if (tag.equals("login")) {
-            return new LoginFragment();
-        } else if(tag.equals("register")) {
-            return new RegisterFragment();
-        } else if(tag.equals("search")) {
-            return new SearchFragment();
+        switch (tag) {
+            case "contact":
+                return new ContactFragment();
+            case "createmulti":
+                return new CreateMultiUserChatFragment();
+            case "login":
+                return new LoginFragment();
+            case "register":
+                return new RegisterFragment();
+            case "search":
+                return new SearchFragment();
         }
         return null;
     }
-
-    public IChatService getIChatService() {
-        return mService;
-    }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +105,8 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         initTitleView();
         onListener();
-        initXMPP();
+        startChatService();
+        bindChatService();
     }
 
     void initTitleView() {
@@ -96,20 +119,10 @@ public class MainActivity extends BaseActivity {
         titleOptionView.setOnClickListener(this);
     }
 
-    void initXMPP() {
-
-        client.connect(new XMPPClient.ConnectListener() {
-            @Override
-            public void onSuccess() {
-                Log.d("connect", "成功");
-                login();
-            }
-
-            @Override
-            public void onFail(Throwable t) {
-                Log.e("connect", "失败", t);
-            }
-        });
+    void connect() throws RemoteException {
+        android.os.Message msg = android.os.Message.obtain(null, ChatService.CHAT_MESSAGE_CONNECT);
+        msg.replyTo = cMessenger;
+        sMessenger.send(msg);
     }
 
     void login() {
@@ -152,8 +165,6 @@ public class MainActivity extends BaseActivity {
                 Log.d("getOfflineMessage", "onComplete");
                 //上线
                 client.available();
-                startChatService();
-                bindChatService();
                 currentFragment = showFragments(R.id.content, "contact", R.anim.fragment_enter_anim, R.anim.fragment_exit_anim, true);
             }
         });
@@ -176,6 +187,11 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        try {
+            ChatService.unregisterMessenger(sMessenger, cMessenger);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
         unbindService(mConnection);
     }
 
