@@ -41,6 +41,8 @@ public class IMessage implements Parcelable {
     private Long timeLength;
     @DatabaseField(columnName="room_id")
     private String roomId;
+    @DatabaseField
+    private Long timestamp;
 
     private String fromUser;
 
@@ -132,6 +134,14 @@ public class IMessage implements Parcelable {
         this.roomId = roomId;
     }
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getFromUser() {
         if(from==null) return null;
         return from.split("/")[0];
@@ -157,6 +167,7 @@ public class IMessage implements Parcelable {
         if(message.getProperty("file-path")!=null) setFilePath((String) message.getProperty("file-path"));
         if(message.getProperty("file-size")!=null) setFileSize((Long) message.getProperty("file-size"));
         if(message.getProperty("time-length")!=null) setTimeLength((Long) message.getProperty("time-length"));
+        if(message.getProperty("timestamp")!=null) setTimestamp((Long) message.getProperty("timestamp"));
     }
 
     public Message getMessage() {
@@ -170,6 +181,7 @@ public class IMessage implements Parcelable {
         if(getFilePath()!=null) message.setProperty("file-path", getFilePath());
         if(getFileSize()!=null) message.setProperty("file-size", getFileSize());
         if(getTimeLength()!=null) message.setProperty("time-length", getTimeLength());
+        if(getTimestamp()!=null) message.setProperty("timestamp", getTimestamp());
         return message;
     }
 
@@ -186,6 +198,7 @@ public class IMessage implements Parcelable {
         setFilePath(in.readString());
         setFileSize(in.readLong());
         setTimeLength(in.readLong());
+        setTimestamp(in.readLong());
     }
 
     @Override
@@ -200,6 +213,7 @@ public class IMessage implements Parcelable {
         parcel.writeString(getFilePath());
         parcel.writeLong(getFileSize() == null ? 0 : getFileSize());
         parcel.writeLong(getTimeLength() == null ? 0 : getTimeLength());
+        parcel.writeLong(getTimestamp() == null ? 0 : getTimestamp());
     }
 
     public static final Parcelable.Creator<IMessage> CREATOR = new Parcelable.Creator<IMessage>() {
@@ -216,4 +230,22 @@ public class IMessage implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "IMessage{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", body='" + body + '\'' +
+                ", from='" + from + '\'' +
+                ", to='" + to + '\'' +
+                ", customType='" + customType + '\'' +
+                ", fileUrl='" + fileUrl + '\'' +
+                ", filePath='" + filePath + '\'' +
+                ", fileSize=" + fileSize +
+                ", timeLength=" + timeLength +
+                ", roomId='" + roomId + '\'' +
+                ", timestamp=" + timestamp +
+                ", fromUser='" + fromUser + '\'' +
+                '}';
+    }
 }

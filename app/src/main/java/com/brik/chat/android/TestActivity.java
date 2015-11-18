@@ -12,17 +12,31 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.brik.chat.db.MessageDAO;
+import com.brik.chat.entry.IMessage;
 import com.brik.chat.service.ChatService;
 import com.brik.chat.utils.MapUtils;
 import com.brik.chat.view.PlayAudioButton;
+import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
+
+import java.sql.SQLException;
+import java.util.List;
+
+import roboguice.activity.RoboFragmentActivity;
 
 /**
  * Created by wangfengchen on 15/7/13.
  */
-public class TestActivity extends Activity {
+public class TestActivity extends RoboFragmentActivity {
 
     IChatService mService;
+
+    @Inject
+    XMPPClient client;
+
+    @Inject
+    MessageDAO messageDAO;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -31,7 +45,8 @@ public class TestActivity extends Activity {
             testFileTransfer();
         }
 
-        @Override public void onServiceDisconnected(ComponentName name) {
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
 
         }
     };
@@ -58,9 +73,26 @@ public class TestActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        bindChatService();
+//        bindChatService();
 //        testPlayAudio();
+        testMessageDB();
+    }
 
+    public void testMessageDB() {
+        IMessage im = new IMessage();
+        im.setFrom("from");
+        im.setTo("to");
+        im.setBody("body");
+        messageDAO.add(im);
+        Log.d("testMessageDB", "testMessageDB");
+        try {
+            List<IMessage> iMessageList = messageDAO.getAll(0, 10);
+            for (IMessage i : iMessageList) {
+                Log.d("message", i.toString());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -70,7 +102,7 @@ public class TestActivity extends Activity {
     }
 
     void testFileTransfer() {
-        final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/c.png";
+        final String filePath = SystemSettings.TEMP_ROOT_DIR + "/c.png";
         try {
             mService.addFileTransfer(
                     MapUtils.create(
@@ -83,12 +115,12 @@ public class TestActivity extends Activity {
 
     void testPlayAudio() {
         PlayAudioButton button = (PlayAudioButton) findViewById(R.id.view);
-        final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/b.mp3";
+        final String filePath = SystemSettings.TEMP_ROOT_DIR + "/b.mp3";
         button.setAudioFilePath(filePath);
     }
 
     void testSendFile() {
-        final String filePath =  SystemSettings.TEMP_ROOT_DIR+"/a.png";
+        final String filePath = SystemSettings.TEMP_ROOT_DIR + "/a.png";
         ImageLoader.getInstance().displayImage(filePath, (ImageView) findViewById(R.id.action_settings));
         findViewById(R.id.action_settings).setOnClickListener(new View.OnClickListener() {
             @Override

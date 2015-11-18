@@ -4,6 +4,8 @@ import com.j256.ormlite.android.apptools.OrmLiteConfigUtil;
 
 import org.jivesoftware.smack.packet.Message;
 
+import java.util.Collections;
+
 /**
  * Created by wangfengchen on 15/11/13.
  */

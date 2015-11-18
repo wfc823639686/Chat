@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.brik.chat.entry.IMessage;
 import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -53,16 +54,26 @@ public class MessageDAO extends BaseDAO<IMessage> {
         return null;
     }
 
-    public List<IMessage> getMessage(String user,long offset, long limit) throws SQLException {
+    public List<IMessage> getMessage(String user, long start, long limit) throws SQLException {
         QueryBuilder<IMessage, Integer> queryBuilder  = dao.queryBuilder();
 //        queryBuilder.where().like("from", "%"+user+"%").or().like("to", "%"+user+"%");
-        queryBuilder.where().eq("room_id", user).and().eq("type", "chat");
-        return queryBuilder.offset(offset).limit(limit).query();
+        Where where = queryBuilder.where();
+        if(start!=0) {
+            where.lt("timestamp", start).and().eq("room_id", user);
+        } else {
+            where.eq("room_id", user);
+        }
+        return queryBuilder.limit(limit).orderBy("timestamp", false).query();
     }
 
     public List<IMessage> getGroupMessage(String groupId,long offset, long limit) throws SQLException {
         QueryBuilder<IMessage, Integer> queryBuilder  = dao.queryBuilder();
-        queryBuilder.where().like("room_id", groupId+"%").and().eq("type", "groupchat");
+        queryBuilder.where().like("room_id", groupId + "%").and().eq("custom_type", "groupchat");
+        return queryBuilder.offset(offset).limit(limit).query();
+    }
+
+    public List<IMessage> getAll(long offset, long limit) throws SQLException {
+        QueryBuilder<IMessage, Integer> queryBuilder  = dao.queryBuilder();
         return queryBuilder.offset(offset).limit(limit).query();
     }
 }

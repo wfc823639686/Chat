@@ -59,6 +59,7 @@ import java.io.File;
 import java.lang.String;import java.lang.System;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -379,16 +380,17 @@ public class XMPPClient {
         messageDAO.add(im);
     }
 
-    public List<IMessage> loadMessageFromDB(String user, int p) throws SQLException {
-        return messageDAO.getMessage(user, p, 20);
+    public List<IMessage> loadMessageFromDB(String user, long start) throws SQLException {
+        return messageDAO.getMessage(user, start, 20);
     }
 
-    public void loadMessageFromDB(final String user, final int p, final LoadMessageFromDBListener listener) {
+    public void loadMessageFromDB(final String user, final long start, final LoadMessageFromDBListener listener) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    List<IMessage> list = loadMessageFromDB(user,p);
+                    List<IMessage> list = loadMessageFromDB(user,start);
+                    Collections.reverse(list);
                     listener.onSuccess(list);
                 } catch (SQLException e) {
                     e.printStackTrace();

@@ -1,4 +1,4 @@
-package com.brik.android.chat;
+package com.brik.chat.android;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

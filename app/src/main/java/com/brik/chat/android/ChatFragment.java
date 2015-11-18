@@ -44,7 +44,7 @@ import roboguice.inject.InjectView;
  */
 public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener{
 
-    int p;
+    long start = 0;//当前message list最小timestamp
 
     String user = "";
 
@@ -209,7 +209,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
         initSuperRecyclerView(view);
         initRecordButton();
         initEditText();
-//        getMessageFromDB(0);
+        loadMessage();
     }
 
     void initEditText() {
@@ -221,7 +221,7 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
 
                     String text = editText.getText().toString();
-                    if(!text.equals("")) {
+                    if (!text.equals("")) {
                         sendText(text);
                         editText.setText("");
                     }
@@ -234,15 +234,23 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
 
     @Override
     public void onRefresh() {
-        client.loadMessageFromDB(user, p++, new XMPPClient.LoadMessageFromDBListener() {
+        loadMessage();
+    }
+
+    void loadMessage() {
+        Log.d("loadMessage", "start time "+start);
+        client.loadMessageFromDB(user, start, new XMPPClient.LoadMessageFromDBListener() {
             @Override
             public void onSuccess(final List<IMessage> list) {
-                mRecycler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mAdapter.addAllAtStart(list);
-                    }
-                });
+                if(list!=null&&!list.isEmpty()) {
+                    start = list.get(0).getTimestamp();
+                    mRecycler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.addAllAtStart(list);
+                        }
+                    });
+                }
             }
 
             @Override
@@ -261,8 +269,6 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
             }
         });
     }
-
-
 
     void createChat() {
         System.out.println("监听聊天消息...");
@@ -339,6 +345,8 @@ public class ChatFragment extends BaseFragment implements SwipeRefreshLayout.OnR
                     im.setFrom(XMPPClient.getInstance().getUser());
                     im.setTo(chat.getParticipant());
                     im.setRoomId(user);
+                    im.setTimestamp(System.currentTimeMillis());
+                    client.saveMessage(im);
                 }else {//如果为空，则重试
 
                 }
